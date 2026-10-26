@@ -12,9 +12,12 @@
     "colors": {
       "ink": "#FF6B70",
       "accent": "#7FA8FF",
-      "highlight": "#FFD43B",
+      "highlight": "#FFC21A",
       "paper": "#101012",
       "shade": "#000000"
+    },
+    "overlay": {
+      "opacity": 0.82
     }
   },
   "defaults": {

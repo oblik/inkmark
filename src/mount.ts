@@ -72,7 +72,9 @@ export async function mountScene(container: HTMLElement, scene: Scene, options: 
   const base = await loadSceneStyle(scene, options);
   const pref = scene.scheme ?? (options.scheme && options.scheme !== 'auto' ? options.scheme : undefined);
   const scheme: 'light' | 'dark' = pref ?? (typeof matchMedia === 'function' && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-  const style: Style = scheme === 'dark' && base.dark?.colors ? { ...base, colors: { ...base.colors, ...base.dark.colors } } : base;
+  const style: Style = scheme === 'dark' && base.dark
+    ? { ...base, colors: { ...base.colors, ...base.dark.colors }, overlay: { ...base.overlay, ...base.dark.overlay } }
+    : base;
   container.classList.add('ik-player');
   container.dataset.ikScheme = scheme;
   injectFont(style, options.baseUrl);
@@ -122,8 +124,13 @@ export async function mountScene(container: HTMLElement, scene: Scene, options: 
 
   const uid = `ik${++uidCounter}`;
   const planned: PlannedStep[] = [];
+  let prevDim: ReturnType<typeof createDim> | undefined;
+  let prevHoles: Box[] = [];
   for (const step of scene.steps) {
     const marks: PlannedStep['marks'] = [];
+    const spec = pickOverlay(options.overlay, step.overlay, scene.overlay, style, style.colors);
+    // A label on the dim layer gets a halo in the paper color, so it stays readable.
+    const halo = spec ? paper : undefined;
     for (const mark of step.marks) {
       const seed = markSeed(mark.id, mark.seed);
       const ctx = {
@@ -138,10 +145,9 @@ export async function mountScene(container: HTMLElement, scene: Scene, options: 
         mark.type === 'highlight' ? color(mark.color, style.defaults.highlight)
         : mark.type === 'label' ? color(mark.color, style.defaults.label)
         : color(mark.color, style.defaults.stroke);
-      const nodes = stage.addMark(mark.id, geometry, parts, token, style, uid);
+      const nodes = stage.addMark(mark.id, geometry, parts, token, style, uid, halo);
       marks.push({ id: mark.id, type: mark.type, with: mark.with, delay: mark.delay, duration: mark.duration, nodes });
     }
-    const spec = pickOverlay(options.overlay, step.overlay, scene.overlay, style, style.colors);
     const holes: Box[] = [];
     if (spec) {
       for (const mark of step.marks) {
@@ -151,9 +157,14 @@ export async function mountScene(container: HTMLElement, scene: Scene, options: 
         } else if (mark.type !== 'label' && mark.type !== 'scribble') holes.push(records.get(mark.id)!.geometry.targetBox);
       }
     }
-    const dim = spec && holes.length
-      ? createDim(stage.dimLayer, stage.defs, `${uid}-dim-${planned.length}`, stage.frameSize, holes, spec, style)
-      : undefined;
+    // A step with no hole targets (labels only) keeps the holes and the dim of the step before.
+    let dim: typeof prevDim;
+    if (spec && holes.length) {
+      dim = createDim(stage.dimLayer, stage.defs, `${uid}-dim-${planned.length}`, stage.frameSize, holes, spec, style);
+      prevHoles = holes;
+    } else if (spec && prevDim) dim = prevDim;
+    prevDim = dim;
+    if (!dim) prevHoles = [];
     planned.push({ step, marks, overlay: dim });
   }
 

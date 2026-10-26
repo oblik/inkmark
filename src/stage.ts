@@ -56,7 +56,7 @@ export interface Stage {
   /** Layer and defs for the spotlight dim layers. */
   dimLayer: SVGElement;
   defs: SVGElement;
-  addMark(id: string, geom: MarkGeometry, parts: PenPart[], color: string, style: Style, uid: string): MarkNodes;
+  addMark(id: string, geom: MarkGeometry, parts: PenPart[], color: string, style: Style, uid: string, halo?: string): MarkNodes;
   destroy(): void;
 }
 
@@ -251,7 +251,7 @@ export async function createStage(container: HTMLElement, scene: Scene, opts: St
     };
   }
 
-  function addMark(id: string, geom: MarkGeometry, parts: PenPart[], color: string, style: Style, uid: string): MarkNodes {
+  function addMark(id: string, geom: MarkGeometry, parts: PenPart[], color: string, style: Style, uid: string, halo?: string): MarkNodes {
     const group = svgEl('g', { 'data-mark': id }) as SVGGElement;
     (geom.layer === 'highlight' ? gHighlight : gMarks).appendChild(group);
     const nodes: MarkNodes = { group, segments: [], chars: [] };
@@ -260,7 +260,7 @@ export async function createStage(container: HTMLElement, scene: Scene, opts: St
     if (geom.band) {
       const p = svgEl('path', {
         d: geom.band.d, fill: 'none', stroke: color, 'stroke-width': geom.band.width,
-        'stroke-linecap': 'butt', opacity: dark ? geom.band.opacity * 0.6 : geom.band.opacity,
+        'stroke-linecap': 'butt', opacity: dark ? geom.band.opacity * 0.9 : geom.band.opacity,
       });
       group.appendChild(p);
       nodes.segments.push({ targets: [draw(p)], weight: 1 });
@@ -298,6 +298,13 @@ export async function createStage(container: HTMLElement, scene: Scene, opts: St
         text.style.fontSize = `${t.fontSize}px`;
         text.style.fontWeight = String(style.font.weight ?? 400);
         text.style.whiteSpace = 'pre';
+        if (halo) {
+          // Paper-colored outline behind the letters, 0.12 em wide outside the glyphs.
+          text.setAttribute('stroke', halo);
+          text.setAttribute('stroke-width', String(t.fontSize * 0.24));
+          text.setAttribute('stroke-linejoin', 'round');
+          text.style.paintOrder = 'stroke';
+        }
         for (const ch of line.text) {
           const ts = svgEl('tspan', { 'fill-opacity': 0 }) as SVGTSpanElement;
           ts.textContent = ch;

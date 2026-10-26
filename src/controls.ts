@@ -57,6 +57,12 @@ const CSS = `
 .ik-steps-play svg{width:16px;height:16px;fill:currentColor;display:block}
 .ik-steps-dot:focus,.ik-steps-play:focus{outline:none}
 .ik-steps-dot:focus-visible,.ik-steps-play:focus-visible{outline:2px solid var(--ik-ctl-ink);outline-offset:3px}
+@media (pointer:coarse){
+  .ik-steps-slab,.ik-steps-play{height:40px;border-radius:20px}
+  .ik-steps-play{width:40px}
+  .ik-steps-dot::after{inset:-18px -4px}
+  .ik-steps-play::after{content:"";position:absolute;inset:-2px}
+}
 @media (prefers-reduced-motion:reduce){
   .ik-steps-dot,.ik-steps-play{transition:none}
 }

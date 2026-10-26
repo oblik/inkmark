@@ -12,9 +12,11 @@ export function highlight(mark: HighlightMark, ctx: GeometryContext): MarkGeomet
   const cy = t[1] + t[3] / 2;
   const x0 = t[0] - 4;
   const x1 = t[0] + t[2] + 4;
-  const j1 = (rand() - 0.5) * 2;
-  const j2 = (rand() - 0.5) * 2;
-  const bow = (rand() - 0.5) * 3;
+  // Hand wobble only on text-height bands. A tall band stays straight, or its ends look skewed.
+  const amp = width > 40 ? 0 : 1;
+  const j1 = (rand() - 0.5) * 2 * amp;
+  const j2 = (rand() - 0.5) * 2 * amp;
+  const bow = (rand() - 0.5) * 3 * amp;
   const d = `M ${f(x0)} ${f(cy + j1)} Q ${f((x0 + x1) / 2)} ${f(cy + bow)} ${f(x1)} ${f(cy + j2)}`;
   return {
     layer: 'highlight',

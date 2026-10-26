@@ -42,8 +42,9 @@ export function buildTimeline(planned: PlannedStep[], style: Style): BuiltTimeli
   for (const { step, marks, overlay } of planned) {
     tl.label(step.id, start);
     // The spotlight fades in with the first mark. The old one fades out at the same time.
-    if (prevDim) tl.add(prevDim.el, { opacity: [prevDim.opacity, 0], duration: prevDim.fadeMs, ease: 'linear' }, start);
-    if (overlay) tl.add(overlay.el, { opacity: [0, overlay.opacity], duration: overlay.fadeMs, ease: 'linear' }, start);
+    const same = overlay && overlay === prevDim; // a carried-over dim layer stays as it is
+    if (prevDim && !same) tl.add(prevDim.el, { opacity: [prevDim.opacity, 0], duration: prevDim.fadeMs, ease: 'linear' }, start);
+    if (overlay && !same) tl.add(overlay.el, { opacity: [0, overlay.opacity], duration: overlay.fadeMs, ease: 'linear' }, start);
     prevDim = overlay;
     let cursor = start;
     if (step.clear && earlier.length) {

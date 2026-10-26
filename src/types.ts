@@ -135,7 +135,7 @@ export interface Style {
   /** Spotlight. `color` is a color token, `fade` is in seconds. */
   overlay: { opacity: number; color: string; pad: number; radius: number; fade: number };
   /** Values used in the dark scheme. */
-  dark?: { colors?: Record<string, string> };
+  dark?: { colors?: Record<string, string>; overlay?: Partial<Style['overlay']> };
   timing: {
     durations: Record<MarkType, number>;
     /** Seconds per character for labels. */
