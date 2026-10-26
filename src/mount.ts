@@ -3,7 +3,7 @@ import type { Timeline } from 'animejs';
 import { resolveStyle } from './styles/index.ts';
 import { markSeed } from './seed.ts';
 import { createStage, resolveUrl } from './stage.ts';
-import { createResolver, toFramePoint, type MarkRecord } from './targets.ts';
+import { createResolver, toFramePoint, toFrameBox, type MarkRecord } from './targets.ts';
 import { renderStrokes } from './geometry/pen.ts';
 import { buildGeometry } from './geometry/index.ts';
 import { buildTimeline, type PlannedStep } from './timeline.ts';
@@ -54,7 +54,12 @@ async function loadSceneStyle(scene: Scene, options: MountOptions): Promise<Styl
     if (!res.ok) throw new Error(`Could not load the style file "${base}" (${res.status}).`);
     base = (await res.json()) as StyleInput;
   }
-  registry.__scene = typeof base === 'string' ? { extends: base } : (base ?? {});
+  // An `extends` in the override swaps the base style the scene named. Scene tweaks stay.
+  const swap = options.style?.extends;
+  registry.__scene =
+    typeof base === 'string' ? { extends: swap ?? base }
+    : swap ? { ...base, extends: swap }
+    : (base ?? {});
   return resolveStyle(options.style ? { ...options.style, extends: '__scene' } : '__scene', registry);
 }
 
@@ -97,6 +102,14 @@ export async function mountScene(container: HTMLElement, scene: Scene, options: 
     return canvas.measureText(text).width;
   };
 
+  let textCache: Box[] | undefined;
+  const obstacles = () => {
+    textCache ??= stage.textBoxes().map((b) => toFrameBox(stage.map, b));
+    const marks: Box[] = [];
+    for (const r of records.values()) if (r.geometry.layer === 'marks') marks.push(r.geometry.bounds.box);
+    return { marks, text: textCache };
+  };
+
   const uid = `mg${++uidCounter}`;
   const planned: PlannedStep[] = [];
   for (const step of scene.steps) {
@@ -104,7 +117,7 @@ export async function mountScene(container: HTMLElement, scene: Scene, options: 
     for (const mark of step.marks) {
       const seed = markSeed(mark.id, mark.seed);
       const ctx = {
-        style, frame: stage.frameSize, seed, region, measure,
+        style, frame: stage.frameSize, seed, region, measure, obstacles,
         arrowOf: (id: string) => records.get(id)?.geometry.arrow,
       };
       const scribblePts = mark.type === 'scribble' ? mark.points.map((p) => toFramePoint(stage.map, p)) : undefined;

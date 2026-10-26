@@ -95,6 +95,7 @@ export async function createPlayer(container: HTMLElement, scene: Scene, options
       else setPos(0, false);
     },
     play() {
+      // Auto-play is off under reduced motion. Use Next and Back.
       if (mode === 'auto' || reduced()) return;
       stop();
       if (atEnd && idx === n - 1) { setPos(0, false); }

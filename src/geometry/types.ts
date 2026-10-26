@@ -44,5 +44,7 @@ export interface GeometryContext {
   /** Resolve a target to a region in frame space. */
   region(target: import('../types.ts').Target, forArrow?: boolean): Region;
   measure(text: string, size: number): number;
+  /** Boxes a label should avoid, in frame space. */
+  obstacles(): { marks: Box[]; text: Box[] };
   arrowOf(id: string): { start: Point; end: Point; tailDir: Point } | undefined;
 }

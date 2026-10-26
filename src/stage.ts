@@ -54,6 +54,8 @@ export interface Stage {
   map: FitMap;
   /** Box of a selector match in background space. */
   selectorBox(selector: string): Box | null;
+  /** Boxes of text in the background, in background space. Empty for images. */
+  textBoxes(): Box[];
   addMark(id: string, geom: MarkGeometry, parts: PenPart[], color: string, style: Style, uid: string): MarkNodes;
   destroy(): void;
 }
@@ -124,6 +126,7 @@ export async function createStage(container: HTMLElement, scene: Scene, opts: St
   }
 
   let selectorBox: Stage['selectorBox'] = () => null;
+  let textBoxes: Stage['textBoxes'] = () => [];
   if (bg.type === 'image') {
     const img = document.createElement('img');
     img.alt = '';
@@ -152,6 +155,17 @@ export async function createStage(container: HTMLElement, scene: Scene, opts: St
     const doc = iframe.contentDocument;
     if (!doc) throw new Error('The html background must be same-origin.');
     await doc.fonts?.ready;
+    textBoxes = () => {
+      const out: Box[] = [];
+      const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT);
+      for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+        if (!n.textContent?.trim()) continue;
+        const range = doc.createRange();
+        range.selectNodeContents(n);
+        for (const r of range.getClientRects()) if (r.width > 1 && r.height > 1) out.push([r.left, r.top, r.width, r.height]);
+      }
+      return out;
+    };
     selectorBox = (sel) => {
       const el = doc.querySelector(sel);
       if (!el) return null;
@@ -177,6 +191,14 @@ export async function createStage(container: HTMLElement, scene: Scene, opts: St
     el.setAttribute('width', String(bg.width));
     el.setAttribute('height', String(bg.height));
     el.style.display = 'block';
+    textBoxes = () => {
+      const b = bgBox.getBoundingClientRect();
+      const k = b.width / bg.width || 1;
+      return [...bgBox.querySelectorAll('text')].map((t) => {
+        const r = t.getBoundingClientRect();
+        return [(r.left - b.left) / k, (r.top - b.top) / k, r.width / k, r.height / k] as Box;
+      });
+    };
     selectorBox = (sel) => {
       const found = bgBox.querySelector(sel);
       if (!found) return null;
@@ -247,7 +269,7 @@ export async function createStage(container: HTMLElement, scene: Scene, opts: St
   }
 
   return {
-    root, frame, frameSize, map, selectorBox, addMark,
+    root, frame, frameSize, map, selectorBox, textBoxes, addMark,
     destroy() {
       observer?.disconnect();
       root.remove();

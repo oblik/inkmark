@@ -35,7 +35,7 @@ const htmlScene: Scene = {
   id: 'sandbox-html',
   background: {
     type: 'html', content: card, width: 600, height: 400,
-    anchors: { tip: [330, 200] },
+    anchors: { tip: [330, 200], f2: [175, 232, 140, 22] },
   },
   frame: { width: 900, height: 600, fit: 'contain' },
   steps: [
@@ -56,8 +56,8 @@ const htmlScene: Scene = {
       { id: 'sc1', type: 'scribble', points: [[60, 330], [90, 310], [75, 345], [110, 320], [100, 355]], thickness: 5 },
     ] },
     { id: 'clear', clear: true, marks: [
-      { id: 'x1', type: 'strike', target: { box: [150, 100, 120, 24] }, crossed: true },
-      { id: 'c2', type: 'circle', target: { anchor: 'tip' }, loops: 2, with: 'x1' },
+      { id: 'x1', type: 'strike', target: { box: [175, 85, 250, 20] }, crossed: true },
+      { id: 'c2', type: 'circle', target: { anchor: 'f2' }, loops: 2, with: 'x1' },
     ] },
   ],
 };

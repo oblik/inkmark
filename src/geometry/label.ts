@@ -1,6 +1,7 @@
 import type { LabelMark } from '../types.ts';
 import type { GeometryContext, LabelLayout, MarkGeometry } from './types.ts';
 import { rectRegion } from './util.ts';
+import type { Box } from '../types.ts';
 
 const MARGIN = 14;
 const GAP = 14;
@@ -45,8 +46,10 @@ export function label(mark: LabelMark, ctx: GeometryContext): MarkGeometry {
     y = cy - h / 2;
   } else {
     const [bx, by, bw, bh] = region.box;
-    const side = !mark.side || mark.side === 'auto' ? pickSide(bx, by, bw, bh, w, h, frame) : mark.side;
-    if (side === 'top') { x = bx + bw / 2 - w / 2; y = by - GAP - h; }
+    const side = !mark.side || mark.side === 'auto' ? undefined : mark.side;
+    if (!side) {
+      [x, y] = autoPlace(region.box, w, h, ctx);
+    } else if (side === 'top') { x = bx + bw / 2 - w / 2; y = by - GAP - h; }
     else if (side === 'bottom') { x = bx + bw / 2 - w / 2; y = by + bh + GAP; }
     else if (side === 'left') { x = bx - GAP - w; y = by + bh / 2 - h / 2; }
     else { x = bx + bw + GAP; y = by + bh / 2 - h / 2; }
@@ -70,18 +73,46 @@ export function label(mark: LabelMark, ctx: GeometryContext): MarkGeometry {
   };
 }
 
-function pickSide(bx: number, by: number, bw: number, bh: number, w: number, h: number, f: { width: number; height: number }) {
-  const space = {
-    top: by - MARGIN - GAP - h,
-    bottom: f.height - (by + bh) - MARGIN - GAP - h,
-    left: bx - MARGIN - GAP - w,
-    right: f.width - (bx + bw) - MARGIN - GAP - w,
-  };
-  let best: 'top' | 'bottom' | 'left' | 'right' = 'bottom';
-  let score = -Infinity;
-  // Prefer top and bottom on ties: text reads better there.
-  for (const s of ['bottom', 'top', 'right', 'left'] as const) {
-    if (space[s] > score) { score = space[s]; best = s; }
+function overlap(a: Box, b: Box): number {
+  const w = Math.min(a[0] + a[2], b[0] + b[2]) - Math.max(a[0], b[0]);
+  const h = Math.min(a[1] + a[3], b[1] + b[3]) - Math.max(a[1], b[1]);
+  return w > 0 && h > 0 ? w * h : 0;
+}
+
+/** Try each side and a few shifts. Pick the spot with the least overlap. First best wins, so it is deterministic. */
+function autoPlace(t: Box, w: number, h: number, ctx: GeometryContext): [number, number] {
+  const { frame } = ctx;
+  const { marks, text } = ctx.obstacles();
+  const [bx, by, bw, bh] = t;
+  const cands: [number, number][] = [];
+  const shifts = [0, -0.35, 0.35, -0.7, 0.7];
+  for (const side of ['bottom', 'top', 'right', 'left'] as const) {
+    for (const g of [GAP, GAP * 2.2, GAP * 4, GAP * 6.5]) {
+      for (const sh of shifts) {
+        if (side === 'top' || side === 'bottom') {
+          const x = bx + bw / 2 - w / 2 + sh * (w + bw) / 2;
+          cands.push([x, side === 'top' ? by - g - h : by + bh + g]);
+        } else {
+          const y = by + bh / 2 - h / 2 + sh * (h + bh) / 2;
+          cands.push([side === 'left' ? bx - g - w : bx + bw + g, y]);
+        }
+      }
+    }
+  }
+  const tbox: Box = [bx - 2, by - 2, bw + 4, bh + 4];
+  let best = cands[0];
+  let bestScore = Infinity;
+  for (const c of cands) {
+    const x = Math.max(MARGIN, Math.min(frame.width - MARGIN - w, c[0]));
+    const y = Math.max(MARGIN, Math.min(frame.height - MARGIN - h, c[1]));
+    const box: Box = [x, y, w, h];
+    let score = overlap(box, tbox) * 4;
+    for (const m of marks) score += overlap(box, m) * 2;
+    for (const m of text) score += overlap(box, m);
+    // Small pull toward the target, and a penalty for being moved by the frame edge.
+    score += Math.hypot(x + w / 2 - (bx + bw / 2), y + h / 2 - (by + bh / 2)) * 4;
+    score += (Math.abs(x - c[0]) + Math.abs(y - c[1])) * 30;
+    if (score < bestScore - 1e-6) { bestScore = score; best = [x, y]; }
   }
   return best;
 }
