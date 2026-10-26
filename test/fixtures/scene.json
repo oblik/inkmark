@@ -1,0 +1,20 @@
+{
+  "marginalia": "1.0",
+  "id": "demo-page",
+  "background": { "type": "html", "src": "page.html", "width": 800, "height": 500 },
+  "steps": [
+    {
+      "id": "step-1",
+      "marks": [
+        { "id": "m1", "type": "circle", "target": { "selector": "h1" } },
+        { "id": "m2", "type": "label", "text": "Product name", "at": { "mark": "m1" } }
+      ]
+    },
+    {
+      "id": "step-2",
+      "marks": [
+        { "id": "m3", "type": "underline", "target": { "selector": ".cta" }, "color": "accent" }
+      ]
+    }
+  ]
+}

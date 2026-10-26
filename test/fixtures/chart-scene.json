@@ -1,0 +1,8 @@
+{
+  "marginalia": "1.0",
+  "id": "demo-chart",
+  "background": { "type": "svg", "src": "chart.svg", "width": 400, "height": 300, "anchors": "anchors.json" },
+  "steps": [
+    { "id": "s1", "marks": [ { "id": "a", "type": "circle", "target": { "anchor": "peak" } } ] }
+  ]
+}

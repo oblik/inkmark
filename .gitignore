@@ -2,6 +2,7 @@
 node_modules/
 dist/
 out/
+dist-demo/
 *.tsbuildinfo
 
 # Local notes and internal docs (never commit)

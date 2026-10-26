@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+<rect width="400" height="300" fill="#fff"/>
+<text id="title" x="20" y="30" font-size="20" font-family="sans-serif">Sales by region</text>
+<rect id="bar-north" x="40" y="120" width="60" height="140" fill="#2f6feb"/>
+<rect id="bar-south" x="140" y="170" width="60" height="90" fill="#7aa5f5"/>
+<circle id="peak" cx="320" cy="90" r="14" fill="#e5484d"/>
+<text x="260" y="280" font-size="14" font-family="sans-serif">Q3 total</text>
+</svg>
