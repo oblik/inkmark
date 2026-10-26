@@ -64,6 +64,10 @@ export function buildTimeline(planned: PlannedStep[], style: Style): BuiltTimeli
       }
       const n = m.nodes.chars.length;
       if (n) {
+        const per = dur / n;
+        m.nodes.chars.forEach((ch, i) => {
+          tl.add(ch, { fillOpacity: [0, 1], duration: Math.max(1, Math.round(per * 0.9)), ease: 'linear' }, at + Math.round(per * i));
+        });
         labelStarts.push({ g: m.nodes.group, at });
       }
     }
