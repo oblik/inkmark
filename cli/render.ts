@@ -6,7 +6,9 @@ import { dirname, join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import { withCapture } from './capture.ts';
 import { findFfmpeg, startEncoder } from './ffmpeg.ts';
+import { rel } from './load.ts';
 import { buildPage, preparePage } from './page.ts';
+import { preflightSelectors } from './selectors.ts';
 import type { PageData } from './page.ts';
 import { launchBrowser } from './browser.ts';
 
@@ -61,7 +63,7 @@ async function renderBuiltin(data: PageData, ffmpeg: string, out: string, fps: n
       throw e;
     }
     await enc.finish();
-    process.stderr.write('\n');
+    if (process.stderr.isTTY) process.stderr.write('\n');
   }, { even: true });
 }
 
@@ -126,10 +128,11 @@ export async function renderCommand(args: string[]): Promise<number> {
     return 1;
   }
   const { loaded, data } = preparePage(positionals[0]);
+  await preflightSelectors(loaded, positionals[0]);
   const out = resolve(values.out ?? join(loaded.dir, `${loaded.scene.id}.mp4`));
   mkdirSync(dirname(out), { recursive: true });
   if (engine === 'hyperframes') await renderHyperframes(data, ffmpeg, out, fps, lead, loaded.dir);
   else await renderBuiltin(data, ffmpeg, out, fps, lead);
-  console.log(out);
+  console.log(rel(out));
   return 0;
 }

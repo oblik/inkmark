@@ -1,5 +1,5 @@
 import type { Box, Issue, Point, Style, StyleInput, ValidationResult } from './types.ts';
-import { resolveStyle } from './styles/index.ts';
+import { builtInStyles, resolveStyle } from './styles/index.ts';
 
 export interface ValidateOptions {
   styles?: Record<string, StyleInput>;
@@ -26,6 +26,8 @@ const EXTRA_FIELDS: Record<string, string[]> = {
 const isObj = (v: unknown): v is Obj => typeof v === 'object' && v !== null && !Array.isArray(v);
 const isNum = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
 const isPos = (v: unknown): v is number => isNum(v) && v > 0;
+const ID_RE = /^[A-Za-z0-9_-]+$/;
+const badId = (id: string) => `Id "${id}" has characters that are not allowed. Use only letters, digits, dashes and underscores.`;
 const isStr = (v: unknown): v is string => typeof v === 'string' && v.length > 0;
 
 export function validate(scene: unknown, options: ValidateOptions = {}): ValidationResult {
@@ -41,6 +43,7 @@ export function validate(scene: unknown, options: ValidateOptions = {}): Validat
 
   if (scene.marginalia !== '1.0') err('marginalia', 'Field "marginalia" must be the text "1.0". Set it to "1.0".');
   if (!isStr(scene.id)) err('id', 'Field "id" must be a non-empty text. Add a short id such as "my-scene".');
+  else if (!ID_RE.test(scene.id)) err('id', badId(scene.id));
 
   // Background
   let bgW = 0;
@@ -87,7 +90,11 @@ export function validate(scene: unknown, options: ValidateOptions = {}): Validat
     style = resolveStyle(scene.style as string | StyleInput | undefined, options.styles);
   } catch (e) {
     const text = e instanceof Error ? e.message.replace(/\s+/g, ' ') : String(e);
-    err('style', `Style does not resolve: ${text}`);
+    const unknown = /^Unknown style "([^"]*)"/.exec(text);
+    if (unknown) {
+      const names = [...Object.keys(builtInStyles), ...Object.keys(options.styles ?? {}).filter((k) => !/[\\/]|\.json$/.test(k))];
+      err('style', `Unknown style "${unknown[1]}". Use a built-in style (${[...new Set(names)].join(', ')}) or a path to a style JSON file.`);
+    } else err('style', `Style does not resolve: ${text}`);
   }
   const tokens = style ? Object.keys(style.colors) : [];
 
@@ -185,7 +192,10 @@ export function validate(scene: unknown, options: ValidateOptions = {}): Validat
     }
     if (!isStr(step.id)) err(`${sp}.id`, 'Step "id" must be a non-empty text. Add a unique id.');
     else if (stepIds.has(step.id) || markIds.has(step.id)) err(`${sp}.id`, `Id "${step.id}" is used twice. Make every step and mark id unique.`);
-    else stepIds.add(step.id);
+    else {
+      stepIds.add(step.id);
+      if (!ID_RE.test(step.id)) err(`${sp}.id`, badId(step.id));
+    }
     for (const k of ['hold'] as const) {
       if (step[k] !== undefined && !(isNum(step[k]) && (step[k] as number) >= 0)) err(`${sp}.${k}`, `Step "${k}" must be a number of seconds, 0 or more. Fix the value.`);
     }
@@ -208,7 +218,10 @@ export function validate(scene: unknown, options: ValidateOptions = {}): Validat
       let id = '';
       if (!isStr(mark.id)) err(`${mp}.id`, 'Mark "id" must be a non-empty text. Add a unique id.');
       else if (stepIds.has(mark.id) || markIds.has(mark.id)) err(`${mp}.id`, `Id "${mark.id}" is used twice. Make every step and mark id unique.`);
-      else id = mark.id;
+      else {
+        id = mark.id;
+        if (!ID_RE.test(id)) err(`${mp}.id`, badId(id));
+      }
 
       if (mark.with !== undefined) {
         if (!isStr(mark.with)) err(`${mp}.with`, '"with" must be a mark id text. Fix the value.');

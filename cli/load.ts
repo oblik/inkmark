@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
-import { dirname, isAbsolute, resolve } from 'node:path';
+import { homedir } from 'node:os';
+import { dirname, isAbsolute, relative, resolve } from 'node:path';
 import type { Box, Issue, Point, Scene, StyleInput } from '../src/types.ts';
 import { builtInStyles } from '../src/styles/index.ts';
 
@@ -19,17 +20,31 @@ export interface LoadedScene {
 
 export const isUrl = (s: string) => /^(https?:|data:|file:)/i.test(s);
 
+/** Path relative to the current folder, for messages. Never shows an absolute path. */
+export function rel(file: string): string {
+  const r = relative(process.cwd(), file);
+  if (!r) return '.';
+  return isAbsolute(r) ? file.replace(homedir(), '~') : r;
+}
+
 export function readJson(file: string): unknown {
   let text: string;
   try {
     text = readFileSync(file, 'utf8');
   } catch {
-    throw new Error(`Cannot read "${file}". Check the path.`);
+    throw new Error(`Cannot read "${rel(file)}". Check the path.`);
   }
   try {
     return JSON.parse(text);
   } catch (e) {
-    throw new Error(`"${file}" is not valid JSON: ${e instanceof Error ? e.message : String(e)}`);
+    const m = /position (\d+)/.exec(e instanceof Error ? e.message : '');
+    let where = '';
+    if (m) {
+      const before = text.slice(0, Number(m[1]));
+      const line = before.split('\n').length;
+      where = ` at line ${line}, column ${before.length - before.lastIndexOf('\n')}`;
+    }
+    throw new Error(`"${rel(file)}" is not valid JSON${where}. Fix the syntax there (check commas, quotes and brackets).`);
   }
 }
 
@@ -40,7 +55,7 @@ function loadStyleFile(file: string, styles: Record<string, StyleInput>, depth =
   if (styles[file] || depth > 10) return;
   const data = readJson(file);
   if (typeof data !== 'object' || data === null || Array.isArray(data)) {
-    throw new Error(`Style file "${file}" must contain a JSON object.`);
+    throw new Error(`Style file "${rel(file)}" must contain a JSON object.`);
   }
   const style = { ...(data as StyleInput) };
   if (typeof style.extends === 'string' && !(style.extends in builtInStyles) && looksLikePath(style.extends)) {

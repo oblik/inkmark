@@ -98,3 +98,21 @@ test('warnings: many marks, long label, box with anchors', () => {
   assert.match(text, /41 characters/);
   assert.match(text, /anchor map exists/);
 });
+
+test('ids must be safe for file names', () => {
+  const s = scene();
+  s.steps[0].id = 'Step One';
+  assert.match(firstError(s).message, /letters, digits, dashes and underscores/);
+});
+
+test('color warning counts distinct effective colors', () => {
+  const s = scene();
+  // ink + ink + ink: no warning
+  assert.equal(validate(s).warnings.length, 0);
+  s.steps[0].marks.push({ id: 'm4', type: 'highlight', target: { box: [0, 0, 10, 10] } });
+  // ink + highlight: 2 colors, no warning
+  assert.ok(!validate(s).warnings.some((w) => /annotation colors/.test(w.message)));
+  s.steps[0].marks.push({ id: 'm5', type: 'box', target: { box: [0, 0, 10, 10] }, color: 'accent' });
+  // ink + highlight + accent: 3 colors, warning
+  assert.ok(validate(s).warnings.some((w) => /3 annotation colors/.test(w.message)));
+});

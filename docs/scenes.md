@@ -104,6 +104,13 @@ A target is an object with exactly one of these keys:
 
 Use the most exact source: selector or anchor first, then box or point.
 
+For html and svg, `validate` opens the background in a browser and checks that every selector matches an element. Use `--no-browser` to skip this. Run `targets <scene>` to list selectors at the scene size.
+
+Common visual mistakes:
+
+1. Do not highlight a filled button. The colors change and the text can become unreadable. Use `box` or `underline`.
+2. Do not use `circle` on a large card. The ellipse gets too big and cuts its neighbors. Use `box`.
+
 ## Timing model
 
 1. Steps play in order. A step starts when the previous step ends.
@@ -135,14 +142,14 @@ Errors (the scene does not work):
 3. `frame` has a size that is not positive, or a wrong `fit`.
 4. The style does not resolve (unknown name, or a loop of `extends`).
 5. `steps` is empty, or a step has no marks.
-6. A step or mark id is empty or used twice.
+6. A scene, step or mark id is empty, used twice, or has characters other than letters, digits, `-` and `_`.
 7. A mark has an unknown `type`.
 8. `with` does not point to an earlier mark of the same step.
 9. `duration`, `delay` or `hold` is below 0 or not a number.
 10. `color` is a hex, `rgb` or `hsl` value, or not a color token of the style.
 11. A target has none or more than one key.
 12. A `box`, `point` or scribble point is outside the background, or a box has no size.
-13. A `selector` is used on an image background.
+13. A `selector` is used on an image background, or (CLI, html and svg) matches no element or is not valid CSS.
 14. An `anchor` is not in the anchor map, or there is no anchor map.
 15. A `mark` target points to itself or to a later mark. `end` is used on a mark that is not an arrow.
 16. A label has no `text`. A scribble has fewer than 2 points. `loops` is not 1 or 2. `sides` or `side` has a wrong value.

@@ -24,8 +24,29 @@ Options:
   --width <px>         grid, targets: page width for html and svg.
   --height <px>        grid, targets: page height for html and svg.
   --json               targets: print JSON.
+  --no-browser         validate: skip the selector check in the browser.
   -h, --help           Show this help.
+
+Run "marginalia <command> --help" for the options of one command.
 `;
+
+const COMMAND_HELP: Record<string, string> = {
+  targets: `Usage: marginalia targets <background-or-scene> [--json] [--width px --height px]
+List elements you can point at: selectors, text and boxes for html and svg, anchors for charts.
+Give a scene file to use its background size. A bare html file uses 1280x800 unless you set --width and --height.`,
+  grid: `Usage: marginalia grid <image> [--step 50] [--out file]
+Write <name>.grid.png next to the image, with lines every --step px and labels every 100 px.
+For .svg and .html files also give --width and --height.`,
+  validate: `Usage: marginalia validate <scene.json> [--no-browser]
+Check a scene. One line per problem. Exit code 1 when there are errors.
+For html and svg backgrounds it also checks every selector in a headless browser. --no-browser skips that.`,
+  preview: `Usage: marginalia preview <scene> [--out dir] [--scale 1]
+Write one PNG per step. --out sets the folder (default: "out" next to the scene). --scale sets the pixel ratio.`,
+  play: `Usage: marginalia play <scene> [--out file.html] [--autoplay] [--loop]
+Write one self-contained HTML player.`,
+  render: `Usage: marginalia render <scene> [--out file.mp4] [--fps 30] [--lead 0.4] [--engine builtin|hyperframes]
+Write an MP4. Needs ffmpeg (or set FFMPEG_PATH). --lead is seconds of the empty background at the start.`,
+};
 
 async function main(): Promise<number> {
   const argv = process.argv.slice(2);
@@ -35,6 +56,10 @@ async function main(): Promise<number> {
     return command ? 0 : 1;
   }
   const rest = argv.slice(1);
+  if (COMMAND_HELP[command] && (rest.includes('--help') || rest.includes('-h'))) {
+    console.log(COMMAND_HELP[command]);
+    return 0;
+  }
   if (['preview', 'play', 'render'].includes(command)) {
     if (command === 'preview') return previewCommand(rest);
     if (command === 'play') return playCommand(rest);
@@ -49,6 +74,7 @@ async function main(): Promise<number> {
       width: { type: 'string' },
       height: { type: 'string' },
       json: { type: 'boolean' },
+      'no-browser': { type: 'boolean' },
       help: { type: 'boolean', short: 'h' },
     },
   });
@@ -66,7 +92,7 @@ async function main(): Promise<number> {
   const height = num(values.height, 'height');
   switch (command) {
     case 'validate':
-      return validateCommand(positionals);
+      return validateCommand(positionals, { browser: !values['no-browser'] });
     case 'grid':
       return gridCommand(positionals, { step: num(values.step, 'step') ?? 50, out: values.out, width, height });
     case 'targets':
@@ -82,7 +108,11 @@ main().then(
     process.exitCode = code;
   },
   (e) => {
-    console.error(`Error: ${e instanceof Error ? e.message : String(e)}`);
+    let msg = e instanceof Error ? e.message : String(e);
+    if (e instanceof Error && String((e as { code?: string }).code).startsWith('ERR_PARSE_ARGS')) {
+      msg = `${msg.split(/\.\s/)[0].replace(/\.$/, '')}. Run "marginalia ${process.argv[2] ?? ''} --help".`;
+    }
+    console.error(`Error: ${msg.split(process.cwd() + '/').join('')}`);
     process.exitCode = 1;
   },
 );

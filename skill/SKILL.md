@@ -25,7 +25,7 @@ Run commands with `node cli/index.ts <command>`.
 
 ## Targets: use the most exact source
 
-1. `html` or `svg` background: run `targets <file>`. Use `{ "selector": "..." }`.
+1. `html` or `svg` background: run `targets <scene>` (it uses the scene background size). Or run `targets <file>` with `--width` and `--height`. Use `{ "selector": "..." }`.
 2. Chart with an anchor map: use `{ "anchor": "name" }`. Run `targets <scene>` to list names.
 3. Image: run `grid <image>`. Open the `.grid.png`. Read x and y from the grid. Use `{ "box": [x, y, w, h] }` or `{ "point": [x, y] }`.
 4. To point at another mark, use `{ "mark": "id" }`. For an arrow, add `"end": "start"` or `"end": "end"`.
@@ -72,6 +72,9 @@ Marks: `circle`, `box`, `underline`, `highlight`, `strike`, `bracket`, `arrow`, 
 8. Using `selector` on an image background. Use `box` or `point`.
 9. Marking everything. Mark only what the viewer must see.
 10. Not looking at the PNGs. `validate` cannot see a mark on the wrong thing.
+11. Highlighting a filled button. The colors change and the text can become unreadable. Use `box` or `underline`.
+12. Using `circle` on a large card. The ellipse grows too big and cuts its neighbors. Use `box`.
+13. Forgetting that default colors count. A mark with no `color` uses the style default. Keep to 2 colors in a scene.
 
 ## Commands
 

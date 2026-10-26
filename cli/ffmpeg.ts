@@ -1,10 +1,15 @@
 import { spawn, spawnSync } from 'node:child_process';
 import type { ChildProcess } from 'node:child_process';
 
-/** Finds ffmpeg: FFMPEG_PATH first, then PATH. Returns undefined when missing. */
+/** Finds ffmpeg: FFMPEG_PATH if set (no fallback), else PATH. Returns undefined when missing. */
 export function findFfmpeg(): string | undefined {
-  const candidates = [process.env.FFMPEG_PATH, 'ffmpeg'].filter((c): c is string => !!c);
-  return candidates.find((c) => spawnSync(c, ['-version'], { stdio: 'ignore' }).status === 0);
+  const works = (c: string) => spawnSync(c, ['-version'], { stdio: 'ignore' }).status === 0;
+  const custom = process.env.FFMPEG_PATH;
+  if (custom) {
+    if (works(custom)) return custom;
+    throw new Error(`FFMPEG_PATH "${custom}" is not a working ffmpeg. Fix the path or unset FFMPEG_PATH.`);
+  }
+  return works('ffmpeg') ? 'ffmpeg' : undefined;
 }
 
 export interface Encoder {

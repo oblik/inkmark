@@ -1,6 +1,7 @@
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, dirname, extname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { rel } from './load.ts';
 import { withPage } from './browser.ts';
 
 export interface GridOptions {
@@ -15,6 +16,7 @@ export async function gridCommand(positionals: string[], opts: GridOptions): Pro
   const input = positionals[0];
   if (!input) throw new Error('Usage: marginalia grid <image> [--step 50] [--out file]');
   const file = resolve(input);
+  if (!existsSync(file)) throw new Error(`Cannot read image "${rel(file)}". Check the path.`);
   const ext = extname(file).toLowerCase();
   const step = opts.step;
   if (!Number.isFinite(step) || step < 5) throw new Error('--step must be a number of 5 or more.');
@@ -125,6 +127,6 @@ export async function gridCommand(positionals: string[], opts: GridOptions): Pro
   });
 
   writeFileSync(out, png);
-  console.log(out);
+  console.log(rel(out));
   return 0;
 }

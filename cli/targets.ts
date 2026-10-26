@@ -146,6 +146,7 @@ export async function targetsCommand(positionals: string[], opts: TargetsOptions
     return 0;
   }
 
+  let sizeNote = '';
   if (!width || !height) {
     if (type === 'svg') {
       const text = content ?? (url?.startsWith('file:') ? readFileSync(new URL(url), 'utf8') : '');
@@ -154,6 +155,7 @@ export async function targetsCommand(positionals: string[], opts: TargetsOptions
       width = 1280;
       height = 800;
     }
+    sizeNote = `Using size ${width}x${height} (no scene, --width or --height given). Pass --width and --height, or run targets on the scene file, to use the real size.`;
   }
 
   const rows = await withPage(width, height, async (page) => {
@@ -169,6 +171,7 @@ export async function targetsCommand(positionals: string[], opts: TargetsOptions
   }
 
   console.log(`${type} ${width}x${height}, ${rows.length} targets`);
+  if (sizeNote) console.log(sizeNote);
   const sw = Math.min(48, Math.max(8, ...rows.map((r) => r.selector.length)));
   const bw = Math.max(3, ...rows.map((r) => `[${r.box.join(', ')}]`.length));
   console.log(`${pad('selector', sw)}  ${pad('box [x, y, w, h]', bw)}  text`);
