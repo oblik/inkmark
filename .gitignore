@@ -3,6 +3,7 @@ node_modules/
 dist/
 out/
 dist-demo/
+demo/public/media/
 *.tsbuildinfo
 
 # Local notes and internal docs (never commit)
