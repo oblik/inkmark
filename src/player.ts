@@ -1,6 +1,7 @@
 import type { Scene } from './types.ts';
 import { mountScene, type MountOptions, type SceneHandle } from './mount.ts';
 import { injectCss } from './stage.ts';
+import { createControls, type Controls } from './controls.ts';
 
 export interface PlayerOptions extends MountOptions {
   controls?: boolean;
@@ -73,6 +74,14 @@ export async function createPlayer(container: HTMLElement, scene: Scene, options
     update();
   };
 
+  // Dot click: show the step from its start, play its draw, stop at drawEnd.
+  function goTo(i: number) {
+    stop();
+    if (reduced()) { setPos(i, true); return; }
+    setPos(i, false);
+    runTo(steps[i].drawEnd, 'step');
+  }
+
   const player: Player = {
     ...handle,
     seek(ms) {
@@ -109,9 +118,14 @@ export async function createPlayer(container: HTMLElement, scene: Scene, options
       else setPos(0, false);
     },
     play() {
-      // Auto-play is off under reduced motion. Use Next and Back.
-      if (mode === 'auto' || reduced()) return;
+      if (mode === 'auto') return;
       stop();
+      // Reduced motion: no timer. Jump to the next finished step.
+      if (reduced()) {
+        if (atEnd && idx === n - 1) setPos(0, true);
+        else setPos(atEnd ? idx + 1 : idx, true);
+        return;
+      }
       if (atEnd && idx === n - 1) { setPos(0, false); }
       runTo(duration, 'auto');
     },
@@ -120,39 +134,25 @@ export async function createPlayer(container: HTMLElement, scene: Scene, options
     destroy() {
       stop();
       detachKeys();
-      controls?.remove();
+      controls?.destroy();
       handle.destroy();
     },
   };
 
-  let controls: HTMLElement | undefined;
+  let controls: Controls | undefined;
   let update = () => {};
   if (options.controls !== false) {
-    controls = document.createElement('div');
-    controls.className = 'ik-controls';
-    const mk = (cls: string, label: string, onClick: () => void) => {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = `ik-btn ${cls}`;
-      b.textContent = label;
-      b.addEventListener('click', onClick);
-      return b;
-    };
-    const back = mk('ik-btn-back', 'Back', () => player.back());
-    const next = mk('ik-btn-next', 'Next', () => player.next());
-    const play = mk('ik-btn-play', 'Play', () => (mode === 'auto' ? player.pause() : player.play()));
-    const count = document.createElement('span');
-    count.className = 'ik-count';
-    count.setAttribute('aria-live', 'polite');
-    controls.append(back, next, play, count);
-    handle.stage.parentElement!.after(controls);
+    controls = createControls({
+      ids: steps.map((s) => s.id),
+      onSeek: (i) => goTo(i),
+      onToggle: () => (mode === 'auto' ? player.pause() : player.play()),
+    });
+    handle.stage.parentElement!.after(controls.el);
     update = () => {
-      const shown = idx === 0 && !atEnd && mode === 'idle' ? 0 : idx + 1;
-      count.textContent = `${shown} / ${n}`;
-      back.disabled = idx === 0 && !atEnd && mode !== 'auto';
-      next.disabled = !options.loop && idx === n - 1 && (atEnd || mode === 'auto');
-      play.textContent = mode === 'auto' ? 'Pause' : 'Play';
-      play.setAttribute('aria-pressed', String(mode === 'auto'));
+      const s = steps[idx];
+      const span = s.drawEnd - s.start;
+      const fill = span > 0 ? (timeline.currentTime - s.start) / span : 1;
+      controls!.set({ index: idx, fill, playing: mode === 'auto' });
     };
   }
 
