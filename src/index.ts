@@ -3,5 +3,7 @@ export type { MountOptions, SceneHandle } from './mount.ts';
 export { createPlayer } from './player.ts';
 export type { Player, PlayerOptions } from './player.ts';
 export { resolveStyle } from './styles/index.ts';
+export { annotate, annotateGroup } from './live.ts';
+export type { Annotation, AnnotationGroup, AnnotateOptions, GroupOptions, LiveMark, LiveTarget } from './live.ts';
 export { validate } from './validate.ts';
 export type * from './types.ts';

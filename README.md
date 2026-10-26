@@ -2,6 +2,21 @@
 
 Inkmark draws hand-drawn marks (circles, arrows, labels) over an image, a web page or a chart. It plays them step by step. One JSON scene gives a web player, one PNG per step and an MP4.
 
+## Use it without the player
+
+You can mark elements on any live page. You need no scene and no background.
+
+```js
+import { annotate } from 'inkmark';
+
+await annotate('#price', 'circle').show();
+await annotate('#plan', { type: 'label', text: 'Best value', side: 'right' }).show();
+```
+
+The script-tag build has the same API as `Inkmark.annotate`. Marks follow their element on scroll and resize, and they follow light and dark. See [docs/live.md](docs/live.md).
+
+A scene can also play with no controls: `createPlayer(el, scene, { controls: false, autoplay: true })`.
+
 ## Example scene
 
 ```json

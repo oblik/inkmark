@@ -35,12 +35,125 @@ function svgEl<K extends string>(name: K, attrs: Record<string, string | number>
   return e;
 }
 
+const REPLACED = 'img,svg,canvas,video,input,button,select,textarea,picture,iframe,object';
+
+function painted(el: Element): boolean {
+  const c = el.ownerDocument.defaultView!.getComputedStyle(el);
+  if (c.backgroundImage !== 'none') return true;
+  if (!/^(transparent|rgba\(0, 0, 0, 0\))$/.test(c.backgroundColor)) return true;
+  return ['Top', 'Right', 'Bottom', 'Left'].some(
+    (k) => parseFloat(c.getPropertyValue(`border-${k.toLowerCase()}-width`)) > 0 && c.getPropertyValue(`border-${k.toLowerCase()}-style`) !== 'none',
+  );
+}
+
+// Box of the text inside an element. null when the element should keep its own box.
+function textBox(el: Element): Box | null {
+  const doc = el.ownerDocument;
+  if (el.matches(REPLACED) || el.querySelector(REPLACED) || painted(el)) return null;
+  for (const d of el.querySelectorAll('*')) if (painted(d)) return null;
+  const rects: Box[] = [];
+  const walker = doc.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+    if (!n.textContent?.trim()) continue;
+    const range = doc.createRange();
+    range.selectNodeContents(n);
+    for (const r of range.getClientRects()) if (r.width > 1 && r.height > 1) rects.push([r.left, r.top, r.width, r.height]);
+  }
+  if (!rects.length) return null;
+  const x0 = Math.min(...rects.map((r) => r[0]));
+  const y0 = Math.min(...rects.map((r) => r[1]));
+  const x1 = Math.max(...rects.map((r) => r[0] + r[2]));
+  const y1 = Math.max(...rects.map((r) => r[1] + r[3]));
+  return [x0, y0, x1 - x0, y1 - y0];
+}
+
+/** Box of an element in its own viewport. Text-only elements get a box around the text. */
+export function elementBox(el: Element): Box {
+  const t = textBox(el);
+  if (t) return t;
+  const r = el.getBoundingClientRect();
+  return [r.left, r.top, r.width, r.height];
+}
+
 export interface MarkNodes {
   group: SVGGElement;
   /** Sequential draw-on segments. `targets` are drawable proxies. */
   segments: { targets: unknown[]; weight: number }[];
   /** Label characters, in order. */
   chars: SVGTSpanElement[];
+}
+
+export function addMarkNodes(
+layers: { highlight: SVGElement; marks: SVGElement; defs: SVGElement },
+frameSize: { width: number; height: number },
+dark: boolean,
+id: string, geom: MarkGeometry, parts: PenPart[], color: string, style: Style, uid: string, halo?: string,
+): MarkNodes {
+  const group = svgEl('g', { 'data-mark': id }) as SVGGElement;
+  (geom.layer === 'highlight' ? layers.highlight : layers.marks).appendChild(group);
+  const nodes: MarkNodes = { group, segments: [], chars: [] };
+  const draw = (el: SVGElement) => svg.createDrawable(el as unknown as SVGGeometryElement)[0];
+
+  if (geom.band) {
+    const p = svgEl('path', {
+      d: geom.band.d, fill: 'none', stroke: color, 'stroke-width': geom.band.width,
+      'stroke-linecap': 'butt', opacity: dark ? geom.band.opacity * 0.9 : geom.band.opacity,
+    });
+    group.appendChild(p);
+    nodes.segments.push({ targets: [draw(p)], weight: 1 });
+  }
+  parts.forEach((part, i) => {
+    if (part.kind === 'stroke') {
+      const targets = part.paths.map((d) => {
+        const p = svgEl('path', {
+          d, fill: 'none', stroke: color, 'stroke-width': geom.width,
+          'stroke-linecap': 'round', 'stroke-linejoin': 'round',
+        });
+        group.appendChild(p);
+        return draw(p);
+      });
+      nodes.segments.push({ targets, weight: part.weight });
+    } else {
+      const maskId = `${uid}-${id}-${i}`;
+      const mask = svgEl('mask', { id: maskId, maskUnits: 'userSpaceOnUse', x: 0, y: 0, width: frameSize.width, height: frameSize.height });
+      const c = svgEl('path', {
+        d: part.center, fill: 'none', stroke: '#fff', 'stroke-width': part.maskWidth,
+        'stroke-linecap': 'round', 'stroke-linejoin': 'round',
+      });
+      mask.appendChild(c);
+      layers.defs.appendChild(mask);
+      group.appendChild(svgEl('path', { d: part.outline, fill: color, mask: `url(#${maskId})` }));
+      nodes.segments.push({ targets: [draw(c)], weight: part.weight });
+    }
+  });
+
+  if (geom.text) {
+    const t = geom.text;
+    for (const line of t.lines) {
+      const text = svgEl('text', { x: line.x, y: line.y, fill: color });
+      text.style.fontFamily = style.font.family;
+      text.style.fontSize = `${t.fontSize}px`;
+      text.style.fontWeight = String(style.font.weight ?? 400);
+      text.style.whiteSpace = 'pre';
+      if (halo) {
+        // Paper-colored outline behind the letters, 0.12 em wide outside the glyphs.
+        text.setAttribute('stroke', halo);
+        text.setAttribute('stroke-width', String(t.fontSize * 0.24));
+        text.setAttribute('stroke-linejoin', 'round');
+        text.style.paintOrder = 'stroke';
+      }
+      for (const ch of line.text) {
+        const ts = svgEl('tspan', { 'fill-opacity': 0 }) as SVGTSpanElement;
+        ts.textContent = ch;
+        text.appendChild(ts);
+        nodes.chars.push(ts);
+      }
+      group.appendChild(text);
+    }
+    // Hidden until the timeline starts the label. Hidden also means no screen reader and no selection.
+    group.style.visibility = 'hidden';
+  }
+  return nodes;
 }
 
 export interface Stage {
@@ -177,42 +290,9 @@ export async function createStage(container: HTMLElement, scene: Scene, opts: St
       }
       return out;
     };
-    const win = doc.defaultView!;
-    const REPLACED = 'img,svg,canvas,video,input,button,select,textarea,picture,iframe,object';
-    const painted = (el: Element) => {
-      const c = win.getComputedStyle(el);
-      if (c.backgroundImage !== 'none') return true;
-      if (!/^(transparent|rgba\(0, 0, 0, 0\))$/.test(c.backgroundColor)) return true;
-      return ['Top', 'Right', 'Bottom', 'Left'].some(
-        (k) => parseFloat(c.getPropertyValue(`border-${k.toLowerCase()}-width`)) > 0 && c.getPropertyValue(`border-${k.toLowerCase()}-style`) !== 'none',
-      );
-    };
-    // Box of the text inside an element. null when the element should keep its own box.
-    const textBox = (el: Element): Box | null => {
-      if (el.matches(REPLACED) || el.querySelector(REPLACED) || painted(el)) return null;
-      for (const d of el.querySelectorAll('*')) if (painted(d)) return null;
-      const rects: Box[] = [];
-      const walker = doc.createTreeWalker(el, NodeFilter.SHOW_TEXT);
-      for (let n = walker.nextNode(); n; n = walker.nextNode()) {
-        if (!n.textContent?.trim()) continue;
-        const range = doc.createRange();
-        range.selectNodeContents(n);
-        for (const r of range.getClientRects()) if (r.width > 1 && r.height > 1) rects.push([r.left, r.top, r.width, r.height]);
-      }
-      if (!rects.length) return null;
-      const x0 = Math.min(...rects.map((r) => r[0]));
-      const y0 = Math.min(...rects.map((r) => r[1]));
-      const x1 = Math.max(...rects.map((r) => r[0] + r[2]));
-      const y1 = Math.max(...rects.map((r) => r[1] + r[3]));
-      return [x0, y0, x1 - x0, y1 - y0];
-    };
     selectorBox = (sel) => {
       const el = doc.querySelector(sel);
-      if (!el) return null;
-      const t = textBox(el);
-      if (t) return t;
-      const r = el.getBoundingClientRect();
-      return [r.left, r.top, r.width, r.height];
+      return el ? elementBox(el) : null;
     };
   } else {
     let markup = bg.content;
@@ -251,73 +331,8 @@ export async function createStage(container: HTMLElement, scene: Scene, opts: St
     };
   }
 
-  function addMark(id: string, geom: MarkGeometry, parts: PenPart[], color: string, style: Style, uid: string, halo?: string): MarkNodes {
-    const group = svgEl('g', { 'data-mark': id }) as SVGGElement;
-    (geom.layer === 'highlight' ? gHighlight : gMarks).appendChild(group);
-    const nodes: MarkNodes = { group, segments: [], chars: [] };
-    const draw = (el: SVGElement) => svg.createDrawable(el as unknown as SVGGeometryElement)[0];
-
-    if (geom.band) {
-      const p = svgEl('path', {
-        d: geom.band.d, fill: 'none', stroke: color, 'stroke-width': geom.band.width,
-        'stroke-linecap': 'butt', opacity: dark ? geom.band.opacity * 0.9 : geom.band.opacity,
-      });
-      group.appendChild(p);
-      nodes.segments.push({ targets: [draw(p)], weight: 1 });
-    }
-    parts.forEach((part, i) => {
-      if (part.kind === 'stroke') {
-        const targets = part.paths.map((d) => {
-          const p = svgEl('path', {
-            d, fill: 'none', stroke: color, 'stroke-width': geom.width,
-            'stroke-linecap': 'round', 'stroke-linejoin': 'round',
-          });
-          group.appendChild(p);
-          return draw(p);
-        });
-        nodes.segments.push({ targets, weight: part.weight });
-      } else {
-        const maskId = `${uid}-${id}-${i}`;
-        const mask = svgEl('mask', { id: maskId, maskUnits: 'userSpaceOnUse', x: 0, y: 0, width: frameSize.width, height: frameSize.height });
-        const c = svgEl('path', {
-          d: part.center, fill: 'none', stroke: '#fff', 'stroke-width': part.maskWidth,
-          'stroke-linecap': 'round', 'stroke-linejoin': 'round',
-        });
-        mask.appendChild(c);
-        defs.appendChild(mask);
-        group.appendChild(svgEl('path', { d: part.outline, fill: color, mask: `url(#${maskId})` }));
-        nodes.segments.push({ targets: [draw(c)], weight: part.weight });
-      }
-    });
-
-    if (geom.text) {
-      const t = geom.text;
-      for (const line of t.lines) {
-        const text = svgEl('text', { x: line.x, y: line.y, fill: color });
-        text.style.fontFamily = style.font.family;
-        text.style.fontSize = `${t.fontSize}px`;
-        text.style.fontWeight = String(style.font.weight ?? 400);
-        text.style.whiteSpace = 'pre';
-        if (halo) {
-          // Paper-colored outline behind the letters, 0.12 em wide outside the glyphs.
-          text.setAttribute('stroke', halo);
-          text.setAttribute('stroke-width', String(t.fontSize * 0.24));
-          text.setAttribute('stroke-linejoin', 'round');
-          text.style.paintOrder = 'stroke';
-        }
-        for (const ch of line.text) {
-          const ts = svgEl('tspan', { 'fill-opacity': 0 }) as SVGTSpanElement;
-          ts.textContent = ch;
-          text.appendChild(ts);
-          nodes.chars.push(ts);
-        }
-        group.appendChild(text);
-      }
-      // Hidden until the timeline starts the label. Hidden also means no screen reader and no selection.
-      group.style.visibility = 'hidden';
-    }
-    return nodes;
-  }
+  const addMark: Stage['addMark'] = (id, geom, parts, color, style, uid, halo) =>
+    addMarkNodes({ highlight: gHighlight, marks: gMarks, defs }, frameSize, dark, id, geom, parts, color, style, uid, halo);
 
   return {
     root, frame, overlay, dimLayer: gDim, defs, frameSize, map, selectorBox, textBoxes, addMark,

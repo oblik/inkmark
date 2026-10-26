@@ -1,6 +1,6 @@
 import type { Box, OverlayInput, Point, Scene, Style, StyleInput, StepTime } from './types.ts';
 import type { Timeline } from 'animejs';
-import { resolveStyle } from './styles/index.ts';
+import { resolveStyle, styleForScheme } from './styles/index.ts';
 import { markSeed } from './seed.ts';
 import { createStage, resolveUrl } from './stage.ts';
 import { createResolver, toFramePoint, toFrameBox, type MarkRecord } from './targets.ts';
@@ -37,7 +37,7 @@ function firstFamily(family: string): string {
   return family.split(',')[0].trim().replace(/^["']|["']$/g, '');
 }
 
-function injectFont(style: Style, baseUrl?: string) {
+export function injectFont(style: Style, baseUrl?: string) {
   const src = style.font.src;
   if (!src) return;
   const family = firstFamily(style.font.family);
@@ -72,9 +72,7 @@ export async function mountScene(container: HTMLElement, scene: Scene, options: 
   const base = await loadSceneStyle(scene, options);
   const pref = scene.scheme ?? (options.scheme && options.scheme !== 'auto' ? options.scheme : undefined);
   const scheme: 'light' | 'dark' = pref ?? (typeof matchMedia === 'function' && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-  const style: Style = scheme === 'dark' && base.dark
-    ? { ...base, colors: { ...base.colors, ...base.dark.colors }, overlay: { ...base.overlay, ...base.dark.overlay } }
-    : base;
+  const style: Style = styleForScheme(base, scheme);
   container.classList.add('ik-player');
   container.dataset.ikScheme = scheme;
   injectFont(style, options.baseUrl);

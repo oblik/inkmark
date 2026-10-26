@@ -9,6 +9,23 @@ Inkmark turns one JSON scene into a web player, one PNG per step or an MP4. You 
 
 Run commands with `node cli/index.ts <command>`.
 
+## Live mode (no scene)
+
+Use live mode when the user wants marks on their own running page, not a video or PNG. Use a scene when the output is a PNG, an MP4 or a step-by-step player.
+
+```js
+import { annotate, annotateGroup } from 'inkmark'; // script tag: Inkmark.annotate
+const a = annotate('#price', 'circle');                          // or { type, ...options }
+const b = annotate('#plan', { type: 'label', text: 'Best value', side: 'right' });
+await a.show(); await a.hide(); a.remove();
+const g = annotateGroup([a, b], { overlay: true });              // one after the other, with spotlight
+```
+
+1. Types: `circle`, `box`, `underline`, `highlight`, `strike`, `bracket`, `arrow` (`from` is a side or an element), `label` (needs `text`).
+2. Options: `style`, `scheme` (`auto`), `overlay`, `animate`. Colors are tokens: `ink`, `accent`, `highlight`.
+3. Use stable selectors (ids, `data-` attributes). Show marks when the element is in view (IntersectionObserver). Mark few things.
+4. Check the result in a real browser screenshot. Full guide: `docs/live.md`.
+
 ## The loop
 
 1. Read the brief. Split it into steps. One idea per step.

@@ -53,3 +53,10 @@ export function resolveStyle(
 
   return build(input ?? DEFAULT_STYLE);
 }
+
+/** The style as it looks in a color scheme. The dark scheme merges `style.dark`. */
+export function styleForScheme(style: Style, scheme: 'light' | 'dark'): Style {
+  return scheme === 'dark' && style.dark
+    ? { ...style, colors: { ...style.colors, ...style.dark.colors }, overlay: { ...style.overlay, ...style.dark.overlay } }
+    : style;
+}

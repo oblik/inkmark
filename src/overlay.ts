@@ -9,6 +9,7 @@ export interface OverlaySpec {
 
 export interface OverlayNode {
   el: SVGElement;
+  mask: SVGElement;
   opacity: number;
   fadeMs: number;
 }
@@ -34,6 +35,25 @@ export function pickOverlay(
   };
 }
 
+const mk = (name: string, attrs: Record<string, string | number>) => {
+  const e = document.createElementNS(SVG_NS, name);
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, String(v));
+  return e;
+};
+
+/** Fills a dim mask: all white (dim) with a black rounded hole per box. */
+export function setHoles(mask: SVGElement, frame: { width: number; height: number }, holes: Box[], style: Style): void {
+  const { pad, radius } = style.overlay;
+  mask.replaceChildren();
+  mask.setAttribute('width', String(frame.width));
+  mask.setAttribute('height', String(frame.height));
+  mask.appendChild(mk('rect', { x: 0, y: 0, width: frame.width, height: frame.height, fill: '#fff' }));
+  for (const [x, y, w, h] of holes) {
+    const r = Math.min(radius, (w + pad * 2) / 2, (h + pad * 2) / 2);
+    mask.appendChild(mk('rect', { x: x - pad, y: y - pad, width: w + pad * 2, height: h + pad * 2, rx: r, ry: r, fill: '#000' }));
+  }
+}
+
 /** A dim layer with rounded holes. It starts invisible. The timeline fades it in. */
 export function createDim(
   layer: SVGElement,
@@ -44,20 +64,10 @@ export function createDim(
   spec: OverlaySpec,
   style: Style,
 ): OverlayNode {
-  const mk = (name: string, attrs: Record<string, string | number>) => {
-    const e = document.createElementNS(SVG_NS, name);
-    for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, String(v));
-    return e;
-  };
-  const { pad, radius } = style.overlay;
   const mask = mk('mask', { id, maskUnits: 'userSpaceOnUse', x: 0, y: 0, width: frame.width, height: frame.height });
-  mask.appendChild(mk('rect', { x: 0, y: 0, width: frame.width, height: frame.height, fill: '#fff' }));
-  for (const [x, y, w, h] of holes) {
-    const r = Math.min(radius, (w + pad * 2) / 2, (h + pad * 2) / 2);
-    mask.appendChild(mk('rect', { x: x - pad, y: y - pad, width: w + pad * 2, height: h + pad * 2, rx: r, ry: r, fill: '#000' }));
-  }
+  setHoles(mask, frame, holes, style);
   defs.appendChild(mask);
   const el = mk('rect', { x: 0, y: 0, width: frame.width, height: frame.height, fill: spec.color, mask: `url(#${id})`, opacity: 0 });
   layer.appendChild(el);
-  return { el, opacity: spec.opacity, fadeMs: Math.max(1, Math.round(style.overlay.fade * 1000)) };
+  return { el, mask, opacity: spec.opacity, fadeMs: Math.max(1, Math.round(style.overlay.fade * 1000)) };
 }

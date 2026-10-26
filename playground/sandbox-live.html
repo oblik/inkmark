@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inkmark live sandbox</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { margin: 0; font: 16px/1.5 system-ui, sans-serif; background: light-dark(#f4f4f2, #151517); color: light-dark(#222, #eee); }
+    .bar { position: sticky; top: 0; z-index: 5; display: flex; gap: 8px; align-items: center; padding: 10px 24px; background: light-dark(#fff, #1f1f23); border-bottom: 1px solid light-dark(#ddd, #333); }
+    button { font: inherit; padding: 4px 12px; border-radius: 6px; border: 1px solid light-dark(#bbb, #555); background: light-dark(#fff, #2a2a2f); color: inherit; cursor: pointer; }
+    main { max-width: 760px; margin: 0 auto; padding: 24px; }
+    section { padding: 60px 0; border-bottom: 1px dashed light-dark(#ccc, #333); }
+    h1 { font-size: 40px; margin: 0 0 8px; }
+    h2 { margin: 0 0 12px; }
+    .price { font-size: 44px; font-weight: 700; }
+    .card { padding: 20px 24px; border-radius: 12px; background: light-dark(#fff, #222226); border: 1px solid light-dark(#ddd, #3a3a40); max-width: 360px; }
+    .cta { display: inline-block; padding: 10px 18px; border-radius: 8px; background: light-dark(#222, #eee); color: light-dark(#fff, #111); }
+    .old { margin-left: 14px; font-size: 22px; }
+    .scroller { height: 220px; overflow: auto; border: 2px solid light-dark(#999, #666); border-radius: 8px; padding: 12px; background: light-dark(#fff, #1c1c20); }
+    .scroller .pad { height: 260px; }
+    .tall { height: 700px; }
+    #steps li { margin: 8px 0; }
+  </style>
+</head>
+<body>
+  <div class="bar">
+    <strong>Live sandbox</strong>
+    <button id="show">Show all</button>
+    <button id="hide">Hide all</button>
+    <button id="group">Play group</button>
+    <button id="unGroup">Hide group</button>
+    <button id="scheme">Switch: light</button>
+  </div>
+  <main>
+    <section>
+      <h1 id="title">Northwind Pro</h1>
+      <p id="lead">Plan trips with your whole team in one place. Share plans and keep them in sync.</p>
+      <div class="card" id="plan">
+        <h2>Pro plan</h2>
+        <div><span class="price" id="price">$24</span> <span class="old" id="old">$39</span> per month</div>
+        <p><span class="cta" id="cta">Start free trial</span></p>
+      </div>
+    </section>
+    <section class="tall">
+      <h2>Features</h2>
+      <ul id="steps">
+        <li id="f-share">Shared itineraries</li>
+        <li id="f-maps">Offline maps</li>
+        <li id="f-bracket">Smart reminders and a long sentence for a bracket</li>
+      </ul>
+      <p id="note">This line gets a scribble-free strike and a highlight.</p>
+    </section>
+    <section>
+      <h2>Scroll box</h2>
+      <div class="scroller" id="box">
+        <div class="pad"></div>
+        <p id="inbox" style="display:inline-block;margin:0">Inside the box</p>
+        <div class="pad"></div>
+      </div>
+    </section>
+    <section>
+      <h2>Group</h2>
+      <div class="card" id="g-card"><strong id="g-a">Step one</strong> then <strong id="g-b">step two</strong> then <strong id="g-c">step three</strong></div>
+    </section>
+    <section class="tall"><p>End of page.</p></section>
+  </main>
+  <script type="module" src="./sandbox-live.ts"></script>
+</body>
+</html>
