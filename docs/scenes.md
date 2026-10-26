@@ -149,12 +149,14 @@ Common visual mistakes:
 
 ## Player behavior
 
-1. Next draws the current step and then pauses.
-2. Next while a step is drawing jumps to the end of the drawing.
-3. Back goes to the finished state of the previous step. It does not draw backward.
-4. Auto-play plays through all holds. Use `loop` to start again.
-5. With `prefers-reduced-motion`, Next and Back jump straight to the finished state.
-6. Keyboard: use `keyboard: false` to turn it off.
+The default controls are a row of dots (one per step) and a Play button. The dot of the current step is a bar that fills while the step draws.
+
+1. Click a dot to go to that step. The earlier steps show their finished state, then the step draws.
+2. Play plays through all steps and holds. At the end, Play starts again from step 1. Use `loop` to repeat.
+3. In code, `next()` draws the current step and then pauses. `next()` while a step draws jumps to the end of the drawing.
+4. In code, `back()` goes to the finished state of the previous step. It does not draw backward.
+5. Keyboard: the arrow keys go to the next or previous step, and Space plays or pauses. Use `keyboard: false` to turn it off.
+6. With `prefers-reduced-motion`, steps jump straight to the finished state.
 
 ## Validation
 

@@ -35,6 +35,7 @@ npm run dev     # starts the demo
 
 ```js
 import { createPlayer } from 'inkmark';
+import '@fontsource/permanent-marker'; // the default label font
 
 const scene = await (await fetch('pricing.json')).json();
 const player = await createPlayer(document.querySelector('#box'), scene, {
@@ -42,7 +43,7 @@ const player = await createPlayer(document.querySelector('#box'), scene, {
 });
 ```
 
-The player shows Back, Next and Play controls. Use `controls: false`, `autoplay: true`, `loop: true` or `keyboard: false` to change this. Use `mountScene` for a paused scene without controls.
+The player shows a row of step dots and a Play button. Click a dot to go to that step. Load the label font on your page (the default is Permanent Marker), or set `font.src` in a style. Use `controls: false`, `autoplay: true`, `loop: true` or `keyboard: false` to change this. Use `mountScene` for a paused scene without controls.
 
 ## CLI
 
