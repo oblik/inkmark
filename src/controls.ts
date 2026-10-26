@@ -24,7 +24,7 @@ const CSS = `
 .ik-steps{
   --ik-ctl-ink:#1c1c1a;--ik-ctl-ink-2:#1c1c1a;--ik-ctl-surface:#efefec;
   --ik-ctl-edge:rgba(0,0,0,.08);--ik-ctl-font:system-ui,sans-serif;
-  display:flex;align-items:center;gap:8px;width:fit-content;max-width:100%;margin-top:12px;
+  display:flex;align-items:center;gap:8px;width:fit-content;max-width:100%;margin:12px auto;
   font:14px/1.2 var(--ik-ctl-font);color:var(--ik-ctl-ink);
 }
 .ik-player[data-ik-scheme="dark"] .ik-steps{
