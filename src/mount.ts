@@ -134,12 +134,19 @@ export async function mountScene(container: HTMLElement, scene: Scene, options: 
     planned.push({ step, marks });
   }
 
+  stage.overlay.setAttribute('role', 'img');
+  const texts = labels.map((m) => (m.type === 'label' ? m.text : ''));
+  if (texts.length) stage.overlay.setAttribute('aria-label', texts.join('. '));
+
   const built = buildTimeline(planned, style);
-  const { timeline, steps, duration } = built;
+  const { timeline, steps, duration, sync } = built;
   timeline.pause();
   timeline.seek(0);
+  sync();
 
-  const seek = (ms: number) => { timeline.seek(Math.max(0, Math.min(duration, ms))); };
+  const seek = (ms: number) => { timeline.seek(Math.max(0, Math.min(duration, ms)));
+    sync();
+  };
   return {
     timeline, steps, duration, stage: stage.frame, seek,
     seekStep(index, at = 'drawEnd') {

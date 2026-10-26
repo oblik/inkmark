@@ -75,6 +75,20 @@ export async function createPlayer(container: HTMLElement, scene: Scene, options
 
   const player: Player = {
     ...handle,
+    seek(ms) {
+      stop();
+      handle.seek(ms);
+      const i = stepAt(ms);
+      const changed = i !== idx;
+      idx = i;
+      atEnd = ms >= steps[i].drawEnd;
+      if (changed) emit();
+      update();
+    },
+    seekStep(index, at = 'drawEnd') {
+      const s = steps[Math.max(0, Math.min(n - 1, index))];
+      if (s) player.seek(at === 'start' ? s.start : at === 'end' ? s.end : s.drawEnd);
+    },
     get current() { return idx; },
     next() {
       if (mode === 'step') { stop(); setPos(idx, true); return; }

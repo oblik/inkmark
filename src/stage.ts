@@ -50,6 +50,7 @@ export interface MarkNodes {
 export interface Stage {
   root: HTMLElement;
   frame: HTMLElement;
+  overlay: SVGSVGElement;
   frameSize: { width: number; height: number };
   map: FitMap;
   /** Box of a selector match in background space. */
@@ -295,12 +296,14 @@ export async function createStage(container: HTMLElement, scene: Scene, opts: St
         }
         group.appendChild(text);
       }
+      // Hidden until the timeline starts the label. Hidden also means no screen reader and no selection.
+      group.style.visibility = 'hidden';
     }
     return nodes;
   }
 
   return {
-    root, frame, frameSize, map, selectorBox, textBoxes, addMark,
+    root, frame, overlay, frameSize, map, selectorBox, textBoxes, addMark,
     destroy() {
       observer?.disconnect();
       root.remove();

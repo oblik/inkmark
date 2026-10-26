@@ -20,6 +20,8 @@ export interface BuiltTimeline {
   timeline: Timeline;
   steps: StepTime[];
   duration: number;
+  /** Update label visibility. Call after a seek to time 0 (the timeline does not render then). */
+  sync(): void;
 }
 
 const FADE_MS = 300;
@@ -31,6 +33,7 @@ export function buildTimeline(planned: PlannedStep[], style: Style): BuiltTimeli
   const earlier: SVGGElement[] = [];
   const t = style.timing;
   let start = 0;
+  const labelStarts: { g: SVGGElement; at: number }[] = [];
 
   for (const { step, marks } of planned) {
     tl.label(step.id, start);
@@ -61,10 +64,7 @@ export function buildTimeline(planned: PlannedStep[], style: Style): BuiltTimeli
       }
       const n = m.nodes.chars.length;
       if (n) {
-        const per = dur / n;
-        m.nodes.chars.forEach((ch, i) => {
-          tl.add(ch, { fillOpacity: [0, 1], duration: Math.max(1, Math.round(per * 0.9)), ease: 'linear' }, at + Math.round(per * i));
-        });
+        labelStarts.push({ g: m.nodes.group, at });
       }
     }
     const holdMs = Math.round((step.hold ?? t.hold) * 1000);
@@ -75,7 +75,13 @@ export function buildTimeline(planned: PlannedStep[], style: Style): BuiltTimeli
     for (const m of marks) earlier.push(m.nodes.group);
     start = end;
   }
-  return { timeline: tl, steps: times, duration: start };
+  // Labels are hidden (also from screen readers) until their start time. Seeking back hides them again.
+  const showLabels = () => {
+    const t = tl.currentTime;
+    for (const l of labelStarts) l.g.style.visibility = t >= l.at ? 'visible' : 'hidden';
+  };
+  tl.onRender = showLabels;
+  return { timeline: tl, steps: times, duration: start, sync: showLabels };
 }
 
 function defaultDuration(m: PlannedMark, style: Style): number {
