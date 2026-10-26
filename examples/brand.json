@@ -1,0 +1,11 @@
+{
+  "extends": "marker",
+  "name": "acme",
+  "colors": {
+    "ink": "#D6336C",
+    "accent": "#0B7285",
+    "highlight": "#FFE066",
+    "paper": "#FFFDF7"
+  },
+  "font": { "family": "\"Kalam\", \"Segoe Print\", cursive", "size": 38, "weight": 400 }
+}
