@@ -1,0 +1,30 @@
+{
+  "name": "marker",
+  "pen": "freehand",
+  "colors": {
+    "ink": "#E5484D",
+    "accent": "#2F6FEB",
+    "highlight": "#FFD43B",
+    "paper": "#FFFFFF"
+  },
+  "defaults": { "stroke": "ink", "highlight": "highlight", "label": "ink", "paper": "paper" },
+  "stroke": { "width": 6, "roughness": 1.2, "bowing": 1, "thinning": 0.5, "highlightWidth": 28 },
+  "font": { "family": "\"Caveat Variable\", Caveat, \"Segoe Print\", cursive", "size": 40, "weight": 600, "lineHeight": 1.1 },
+  "timing": {
+    "durations": {
+      "circle": 0.7,
+      "box": 0.8,
+      "underline": 0.45,
+      "highlight": 0.5,
+      "strike": 0.35,
+      "bracket": 0.5,
+      "arrow": 0.6,
+      "label": 0.4,
+      "scribble": 0.8
+    },
+    "labelPerChar": 0.035,
+    "hold": 1.2,
+    "gap": 0.15,
+    "easing": "inOutQuad"
+  }
+}

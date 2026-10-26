@@ -1,0 +1,6 @@
+{
+  "extends": "marker",
+  "name": "sketch",
+  "pen": "rough",
+  "stroke": { "width": 2.5, "roughness": 1.6, "bowing": 1.2, "thinning": 0, "highlightWidth": 28 }
+}

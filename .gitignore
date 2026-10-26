@@ -1,0 +1,17 @@
+# Dependencies and build output
+node_modules/
+dist/
+out/
+*.tsbuildinfo
+
+# Local notes and internal docs (never commit)
+SPEC.md
+.work/
+.env
+.env.*
+
+# OS and editor
+.DS_Store
+.idea/
+.vscode/
+*.log
