@@ -1,4 +1,4 @@
-import type { LabelMark } from '../types.ts';
+import type { LabelMark, Side } from '../types.ts';
 import type { GeometryContext, LabelLayout, MarkGeometry } from './types.ts';
 import { rectRegion } from './util.ts';
 import type { Box } from '../types.ts';
@@ -26,7 +26,7 @@ export function label(mark: LabelMark, ctx: GeometryContext): MarkGeometry {
   const { style, frame } = ctx;
   const size = mark.size ?? style.font.size;
   const lh = size * (style.font.lineHeight ?? 1.1);
-  const maxWidth = mark.maxWidth ?? Math.min(frame.width * 0.45, size * 12);
+  const maxWidth = mark.maxWidth ?? Math.min(frame.width * 0.6, size * 18);
   const lines = wrap(mark.text, maxWidth, size, ctx.measure);
   const w = Math.max(...lines.map((l) => ctx.measure(l, size)), 1);
   const h = lines.length * lh;
@@ -34,25 +34,40 @@ export function label(mark: LabelMark, ctx: GeometryContext): MarkGeometry {
   const at = mark.at;
   const arrow = 'mark' in at ? ctx.arrowOf(at.mark) : undefined;
   const region = ctx.region(at);
+  const explicit = mark.side && mark.side !== 'auto' ? mark.side : undefined;
+  const fits = (px: number, py: number) =>
+    px >= MARGIN - 0.5 && py >= MARGIN - 0.5 && px + w <= frame.width - MARGIN + 0.5 && py + h <= frame.height - MARGIN + 0.5;
+  const opposite = { top: 'bottom', bottom: 'top', left: 'right', right: 'left' } as const;
+  // Spot on one side of a box. Flip to the other side when it does not fit.
+  const onSide = (b: Box, side: Side): [number, number] => {
+    const at = (s: Side): [number, number] => {
+      const [bx, by, bw, bh] = b;
+      if (s === 'top') return [bx + bw / 2 - w / 2, by - GAP - h];
+      if (s === 'bottom') return [bx + bw / 2 - w / 2, by + bh + GAP];
+      if (s === 'left') return [bx - GAP - w, by + bh / 2 - h / 2];
+      return [bx + bw + GAP, by + bh / 2 - h / 2];
+    };
+    const first = at(side);
+    if (fits(first[0], first[1])) return first;
+    const flipped = at(opposite[side]);
+    return fits(flipped[0], flipped[1]) ? flipped : first;
+  };
   let x: number;
   let y: number;
   if (arrow && 'mark' in at && (at.end ?? 'start') === 'start') {
-    // Next to the arrow tail, on the side away from the arrow.
-    const [dx, dy] = arrow.tailDir;
-    const reach = Math.abs(dx) * (w / 2) + Math.abs(dy) * (h / 2);
-    const cx = arrow.start[0] + dx * (reach + GAP);
-    const cy = arrow.start[1] + dy * (reach + GAP);
-    x = cx - w / 2;
-    y = cy - h / 2;
+    if (explicit) {
+      [x, y] = onSide([arrow.start[0], arrow.start[1], 0, 0], explicit);
+    } else {
+      // Next to the arrow tail, on the side away from the arrow.
+      const [dx, dy] = arrow.tailDir;
+      const reach = Math.abs(dx) * (w / 2) + Math.abs(dy) * (h / 2);
+      x = arrow.start[0] + dx * (reach + GAP) - w / 2;
+      y = arrow.start[1] + dy * (reach + GAP) - h / 2;
+    }
+  } else if (explicit) {
+    [x, y] = onSide(region.box, explicit);
   } else {
-    const [bx, by, bw, bh] = region.box;
-    const side = !mark.side || mark.side === 'auto' ? undefined : mark.side;
-    if (!side) {
-      [x, y] = autoPlace(region.box, w, h, ctx);
-    } else if (side === 'top') { x = bx + bw / 2 - w / 2; y = by - GAP - h; }
-    else if (side === 'bottom') { x = bx + bw / 2 - w / 2; y = by + bh + GAP; }
-    else if (side === 'left') { x = bx - GAP - w; y = by + bh / 2 - h / 2; }
-    else { x = bx + bw + GAP; y = by + bh / 2 - h / 2; }
+    [x, y] = autoPlace(region.box, w, h, ctx);
   }
   x = Math.max(MARGIN, Math.min(frame.width - MARGIN - w, x));
   y = Math.max(MARGIN, Math.min(frame.height - MARGIN - h, y));

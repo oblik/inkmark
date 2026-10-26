@@ -166,9 +166,40 @@ export async function createStage(container: HTMLElement, scene: Scene, opts: St
       }
       return out;
     };
+    const win = doc.defaultView!;
+    const REPLACED = 'img,svg,canvas,video,input,button,select,textarea,picture,iframe,object';
+    const painted = (el: Element) => {
+      const c = win.getComputedStyle(el);
+      if (c.backgroundImage !== 'none') return true;
+      if (!/^(transparent|rgba\(0, 0, 0, 0\))$/.test(c.backgroundColor)) return true;
+      return ['Top', 'Right', 'Bottom', 'Left'].some(
+        (k) => parseFloat(c.getPropertyValue(`border-${k.toLowerCase()}-width`)) > 0 && c.getPropertyValue(`border-${k.toLowerCase()}-style`) !== 'none',
+      );
+    };
+    // Box of the text inside an element. null when the element should keep its own box.
+    const textBox = (el: Element): Box | null => {
+      if (el.matches(REPLACED) || el.querySelector(REPLACED) || painted(el)) return null;
+      for (const d of el.querySelectorAll('*')) if (painted(d)) return null;
+      const rects: Box[] = [];
+      const walker = doc.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+      for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+        if (!n.textContent?.trim()) continue;
+        const range = doc.createRange();
+        range.selectNodeContents(n);
+        for (const r of range.getClientRects()) if (r.width > 1 && r.height > 1) rects.push([r.left, r.top, r.width, r.height]);
+      }
+      if (!rects.length) return null;
+      const x0 = Math.min(...rects.map((r) => r[0]));
+      const y0 = Math.min(...rects.map((r) => r[1]));
+      const x1 = Math.max(...rects.map((r) => r[0] + r[2]));
+      const y1 = Math.max(...rects.map((r) => r[1] + r[3]));
+      return [x0, y0, x1 - x0, y1 - y0];
+    };
     selectorBox = (sel) => {
       const el = doc.querySelector(sel);
       if (!el) return null;
+      const t = textBox(el);
+      if (t) return t;
       const r = el.getBoundingClientRect();
       return [r.left, r.top, r.width, r.height];
     };
