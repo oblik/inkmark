@@ -12,15 +12,15 @@ export function resolveUrl(src: string, baseUrl?: string): string {
 }
 
 const CSS = `
-.mg-root{position:relative;display:block;max-width:100%;overflow:hidden}
-.mg-stage{position:absolute;left:0;top:0;overflow:hidden;transform-origin:0 0}
-.mg-bg{position:absolute;transform-origin:0 0}
-.mg-bg>*{display:block;border:0;pointer-events:none}
-.mg-overlay{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
-.mg-controls{display:flex;align-items:center;gap:8px;margin-top:12px;font:14px/1.2 system-ui,sans-serif}
-.mg-btn{font:inherit;padding:6px 14px;border:1px solid currentColor;border-radius:6px;background:transparent;color:inherit;cursor:pointer}
-.mg-btn:disabled{opacity:.4;cursor:default}
-.mg-count{margin-left:auto;font-variant-numeric:tabular-nums}
+.ik-root{position:relative;display:block;max-width:100%;overflow:hidden}
+.ik-stage{position:absolute;left:0;top:0;overflow:hidden;transform-origin:0 0}
+.ik-bg{position:absolute;transform-origin:0 0}
+.ik-bg>*{display:block;border:0;pointer-events:none}
+.ik-overlay{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
+.ik-controls{display:flex;align-items:center;gap:8px;margin-top:12px;font:14px/1.2 system-ui,sans-serif}
+.ik-btn{font:inherit;padding:6px 14px;border:1px solid currentColor;border-radius:6px;background:transparent;color:inherit;cursor:pointer}
+.ik-btn:disabled{opacity:.4;cursor:default}
+.ik-count{margin-left:auto;font-variant-numeric:tabular-nums}
 `;
 
 let cssInjected = false;
@@ -28,7 +28,7 @@ export function injectCss(): void {
   if (cssInjected || typeof document === 'undefined') return;
   cssInjected = true;
   const s = document.createElement('style');
-  s.setAttribute('data-marginalia', '');
+  s.setAttribute('data-inkmark', '');
   s.textContent = CSS;
   document.head.prepend(s);
 }
@@ -81,16 +81,16 @@ export async function createStage(container: HTMLElement, scene: Scene, opts: St
   const map = fitBackground(bg, { ...frameSize, fit: scene.frame?.fit });
 
   const root = document.createElement('div');
-  root.className = 'mg-root';
+  root.className = 'ik-root';
   const frame = document.createElement('div');
-  frame.className = 'mg-stage';
+  frame.className = 'ik-stage';
   frame.style.width = `${frameSize.width}px`;
   frame.style.height = `${frameSize.height}px`;
   frame.style.background = scene.frame?.color ?? opts.frameColor;
   root.appendChild(frame);
 
   const bgBox = document.createElement('div');
-  bgBox.className = 'mg-bg';
+  bgBox.className = 'ik-bg';
   Object.assign(bgBox.style, {
     left: `${map.ox}px`, top: `${map.oy}px`, width: `${bg.width}px`, height: `${bg.height}px`,
     transform: `scale(${map.scale})`,
@@ -98,13 +98,13 @@ export async function createStage(container: HTMLElement, scene: Scene, opts: St
   frame.appendChild(bgBox);
 
   const overlay = svgEl('svg', {
-    class: 'mg-overlay', width: frameSize.width, height: frameSize.height,
+    class: 'ik-overlay', width: frameSize.width, height: frameSize.height,
     viewBox: `0 0 ${frameSize.width} ${frameSize.height}`,
   }) as SVGSVGElement;
   const defs = svgEl('defs');
-  const gHighlight = svgEl('g', { class: 'mg-layer-highlight' });
+  const gHighlight = svgEl('g', { class: 'ik-layer-highlight' });
   gHighlight.style.mixBlendMode = 'multiply';
-  const gMarks = svgEl('g', { class: 'mg-layer-marks' });
+  const gMarks = svgEl('g', { class: 'ik-layer-marks' });
   overlay.append(defs, gHighlight, gMarks);
   frame.appendChild(overlay);
 

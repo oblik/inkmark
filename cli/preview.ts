@@ -13,7 +13,7 @@ export async function previewCommand(args: string[]): Promise<number> {
     options: { out: { type: 'string' }, scale: { type: 'string' } },
   });
   if (positionals.length !== 1) {
-    console.error('Usage: marginalia preview <scene> [--out dir] [--scale 1]');
+    console.error('Usage: inkmark preview <scene> [--out dir] [--scale 1]');
     return 1;
   }
   const scale = values.scale === undefined ? 1 : Number(values.scale);

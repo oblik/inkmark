@@ -112,7 +112,7 @@ const pad = (s: string, n: number) => s + ' '.repeat(Math.max(0, n - s.length));
 
 export async function targetsCommand(positionals: string[], opts: TargetsOptions): Promise<number> {
   const input = positionals[0];
-  if (!input) throw new Error('Usage: marginalia targets <background-or-scene> [--json] [--width --height]');
+  if (!input) throw new Error('Usage: inkmark targets <background-or-scene> [--json] [--width --height]');
 
   let type: string;
   let url: string | undefined;
@@ -141,7 +141,7 @@ export async function targetsCommand(positionals: string[], opts: TargetsOptions
   }
 
   if (type === 'image') {
-    console.log(`Image background: no elements to list. Run: marginalia grid ${imageHint || '<image>'}`);
+    console.log(`Image background: no elements to list. Run: inkmark grid ${imageHint || '<image>'}`);
     if (anchors) printAnchors(anchors, opts.json);
     return 0;
   }

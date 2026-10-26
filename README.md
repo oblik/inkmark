@@ -1,12 +1,12 @@
-# Marginalia
+# Inkmark
 
-Marginalia draws hand-drawn marks (circles, arrows, labels) over an image, a web page or a chart. It plays them step by step. One JSON scene gives a web player, one PNG per step and an MP4.
+Inkmark draws hand-drawn marks (circles, arrows, labels) over an image, a web page or a chart. It plays them step by step. One JSON scene gives a web player, one PNG per step and an MP4.
 
 ## Example scene
 
 ```json
 {
-  "marginalia": "1.0",
+  "inkmark": "1.0",
   "id": "pricing",
   "background": { "type": "image", "src": "pricing.png", "width": 1280, "height": 800 },
   "steps": [
@@ -34,7 +34,7 @@ npm run dev     # starts the demo
 ## Quick start in the browser
 
 ```js
-import { createPlayer } from 'marginalia';
+import { createPlayer } from 'inkmark';
 
 const scene = await (await fetch('pricing.json')).json();
 const player = await createPlayer(document.querySelector('#box'), scene, {
@@ -46,7 +46,7 @@ The player shows Back, Next and Play controls. Use `controls: false`, `autoplay:
 
 ## CLI
 
-Run commands with `node cli/index.ts <command>` or `npm run marginalia -- <command>`.
+Run commands with `node cli/index.ts <command>` or `npm run inkmark -- <command>`.
 
 | Command | What it does |
 | --- | --- |
@@ -57,7 +57,7 @@ Run commands with `node cli/index.ts <command>` or `npm run marginalia -- <comma
 | `play <scene>` | Writes one self-contained HTML player. Use `--out file.html`, `--autoplay`, `--loop`. |
 | `render <scene>` | Writes an MP4. Use `--out file.mp4`, `--fps 30`, `--lead 0.4`, `--engine builtin\|hyperframes`. |
 
-The built-in engine uses headless Chromium and ffmpeg. HyperFrames is optional. Use it only if you install it. Marginalia turns its telemetry off.
+The built-in engine uses headless Chromium and ffmpeg. HyperFrames is optional. Use it only if you install it. Inkmark turns its telemetry off.
 
 ## Marks
 

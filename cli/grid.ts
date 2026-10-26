@@ -14,7 +14,7 @@ export interface GridOptions {
 /** Draws the grid on a canvas laid over the image, then screenshots the page. */
 export async function gridCommand(positionals: string[], opts: GridOptions): Promise<number> {
   const input = positionals[0];
-  if (!input) throw new Error('Usage: marginalia grid <image> [--step 50] [--out file]');
+  if (!input) throw new Error('Usage: inkmark grid <image> [--step 50] [--out file]');
   const file = resolve(input);
   if (!existsSync(file)) throw new Error(`Cannot read image "${rel(file)}". Check the path.`);
   const ext = extname(file).toLowerCase();

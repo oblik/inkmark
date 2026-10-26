@@ -6,7 +6,7 @@ import { checkSelectors } from './selectors.ts';
 
 export async function validateCommand(positionals: string[], opts: { browser?: boolean } = {}): Promise<number> {
   const path = positionals[0];
-  if (!path) throw new Error('Usage: marginalia validate <scene.json>');
+  if (!path) throw new Error('Usage: inkmark validate <scene.json>');
   const loaded = loadScene(path);
   const result = validate(loaded.scene, { styles: loaded.styles, anchors: loaded.anchors });
   const styleProblem = loaded.problems.some((p) => p.path === 'style');

@@ -95,7 +95,7 @@ export interface Step {
 }
 
 export interface Scene {
-  marginalia: '1.0';
+  inkmark: '1.0';
   id: string;
   background: Background;
   /** Output size. Default: background size. */

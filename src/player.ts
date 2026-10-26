@@ -129,20 +129,20 @@ export async function createPlayer(container: HTMLElement, scene: Scene, options
   let update = () => {};
   if (options.controls !== false) {
     controls = document.createElement('div');
-    controls.className = 'mg-controls';
+    controls.className = 'ik-controls';
     const mk = (cls: string, label: string, onClick: () => void) => {
       const b = document.createElement('button');
       b.type = 'button';
-      b.className = `mg-btn ${cls}`;
+      b.className = `ik-btn ${cls}`;
       b.textContent = label;
       b.addEventListener('click', onClick);
       return b;
     };
-    const back = mk('mg-btn-back', 'Back', () => player.back());
-    const next = mk('mg-btn-next', 'Next', () => player.next());
-    const play = mk('mg-btn-play', 'Play', () => (mode === 'auto' ? player.pause() : player.play()));
+    const back = mk('ik-btn-back', 'Back', () => player.back());
+    const next = mk('ik-btn-next', 'Next', () => player.next());
+    const play = mk('ik-btn-play', 'Play', () => (mode === 'auto' ? player.pause() : player.play()));
     const count = document.createElement('span');
-    count.className = 'mg-count';
+    count.className = 'ik-count';
     count.setAttribute('aria-live', 'polite');
     controls.append(back, next, play, count);
     handle.stage.parentElement!.after(controls);

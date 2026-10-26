@@ -31,7 +31,7 @@ const chart = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 300" wid
 </svg>`;
 
 const htmlScene: Scene = {
-  marginalia: '1.0',
+  inkmark: '1.0',
   id: 'sandbox-html',
   background: {
     type: 'html', content: card, width: 600, height: 400,
@@ -63,7 +63,7 @@ const htmlScene: Scene = {
 };
 
 const svgScene: Scene = {
-  marginalia: '1.0',
+  inkmark: '1.0',
   id: 'sandbox-svg',
   background: { type: 'svg', content: chart, width: 600, height: 300, anchors: { peak: [305, 80], bars: [70, 80, 470, 180] } },
   frame: { width: 900, height: 450 },

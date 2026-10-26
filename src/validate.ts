@@ -41,7 +41,7 @@ export function validate(scene: unknown, options: ValidateOptions = {}): Validat
     return { ok: false, errors, warnings };
   }
 
-  if (scene.marginalia !== '1.0') err('marginalia', 'Field "marginalia" must be the text "1.0". Set it to "1.0".');
+  if (scene.inkmark !== '1.0') err('inkmark', 'Field "inkmark" must be the text "1.0". Set it to "1.0".');
   if (!isStr(scene.id)) err('id', 'Field "id" must be a non-empty text. Add a short id such as "my-scene".');
   else if (!ID_RE.test(scene.id)) err('id', badId(scene.id));
 

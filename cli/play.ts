@@ -12,7 +12,7 @@ export async function playCommand(args: string[]): Promise<number> {
     options: { out: { type: 'string' }, autoplay: { type: 'boolean' }, loop: { type: 'boolean' } },
   });
   if (positionals.length !== 1) {
-    console.error('Usage: marginalia play <scene> [--out file.html] [--autoplay] [--loop]');
+    console.error('Usage: inkmark play <scene> [--out file.html] [--autoplay] [--loop]');
     return 1;
   }
   const { loaded, data } = preparePage(positionals[0]);

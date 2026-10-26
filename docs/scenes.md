@@ -8,7 +8,7 @@ Units: all sizes and coordinates are pixels in the background's own space. All t
 
 | Field | Type | Default | Notes |
 | --- | --- | --- | --- |
-| `marginalia` | `"1.0"` | none | Required. |
+| `inkmark` | `"1.0"` | none | Required. |
 | `id` | text | none | Required. Used in output file names. |
 | `background` | object | none | Required. See below. |
 | `frame` | object | background size | Output size. |
@@ -137,7 +137,7 @@ Run `node cli/index.ts validate <scene>`. Each message says what is wrong and ho
 
 Errors (the scene does not work):
 
-1. `marginalia` is not `"1.0"`, or `id` is empty.
+1. `inkmark` is not `"1.0"`, or `id` is empty.
 2. The background is missing, has a wrong `type`, has no `width` or `height`, or has neither `src` nor `content`.
 3. `frame` has a size that is not positive, or a wrong `fit`.
 4. The style does not resolve (unknown name, or a loop of `extends`).
@@ -167,7 +167,7 @@ Warnings (the scene works, but it may read badly):
 
 ```json
 {
-  "marginalia": "1.0",
+  "inkmark": "1.0",
   "id": "checkout",
   "background": { "type": "image", "src": "checkout.png", "width": 1280, "height": 800 },
   "frame": { "width": 1280, "height": 800, "fit": "contain" },

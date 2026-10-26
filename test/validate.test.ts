@@ -4,7 +4,7 @@ import { validate } from '../src/validate.ts';
 
 function scene(): any {
   return {
-    marginalia: '1.0',
+    inkmark: '1.0',
     id: 's',
     background: { type: 'image', src: 'a.png', width: 1000, height: 800 },
     steps: [

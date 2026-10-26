@@ -41,7 +41,7 @@ function injectFont(style: Style, baseUrl?: string) {
   if (fontsDone.has(key)) return;
   fontsDone.add(key);
   const el = document.createElement('style');
-  el.setAttribute('data-marginalia-font', family);
+  el.setAttribute('data-inkmark-font', family);
   el.textContent = `@font-face{font-family:"${family}";src:url("${url}");font-weight:100 900;font-display:block}`;
   document.head.appendChild(el);
 }
@@ -110,7 +110,7 @@ export async function mountScene(container: HTMLElement, scene: Scene, options: 
     return { marks, text: textCache };
   };
 
-  const uid = `mg${++uidCounter}`;
+  const uid = `ik${++uidCounter}`;
   const planned: PlannedStep[] = [];
   for (const step of scene.steps) {
     const marks: PlannedStep['marks'] = [];

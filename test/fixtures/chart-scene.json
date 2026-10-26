@@ -1,5 +1,5 @@
 {
-  "marginalia": "1.0",
+  "inkmark": "1.0",
   "id": "demo-chart",
   "background": { "type": "svg", "src": "chart.svg", "width": 400, "height": 300, "anchors": "anchors.json" },
   "steps": [

@@ -1,11 +1,11 @@
 ---
-name: marginalia
+name: inkmark
 description: Use when a brief asks for hand-drawn marks (circles, arrows, labels) over a screenshot, web page or chart, as a web player, PNG steps or an MP4.
 ---
 
-# Marginalia
+# Inkmark
 
-Marginalia turns one JSON scene into a web player, one PNG per step or an MP4. You write only the scene JSON. You write no code and no SVG.
+Inkmark turns one JSON scene into a web player, one PNG per step or an MP4. You write only the scene JSON. You write no code and no SVG.
 
 Run commands with `node cli/index.ts <command>`.
 
@@ -34,7 +34,7 @@ Run commands with `node cli/index.ts <command>`.
 
 ```json
 {
-  "marginalia": "1.0",
+  "inkmark": "1.0",
   "id": "my-scene",
   "background": { "type": "image", "src": "screen.png", "width": 1280, "height": 800 },
   "steps": [

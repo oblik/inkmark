@@ -32,7 +32,7 @@ A style is a set of tokens: colors, pen, stroke, font and timing. A scene picks 
 | `marker` | `freehand` | 6 | `ink` red, `accent` blue, `highlight` yellow, `paper` white |
 | `sketch` | `rough` | 2.5 | same as `marker` |
 
-`marker` uses the Caveat font at 40 pixels. Defaults: stroke and label use `ink`, highlight uses `highlight`, paper uses `paper`. `sketch` extends `marker` and changes only the pen and stroke.
+`marker` uses the Permanent Marker font at 34 pixels. Defaults: stroke and label use `ink`, highlight uses `highlight`, paper uses `paper`. `sketch` extends `marker` and changes only the pen and stroke.
 
 ## Rules
 
@@ -66,7 +66,7 @@ Use it in a scene. The path starts at the scene file:
 
 ```json
 {
-  "marginalia": "1.0",
+  "inkmark": "1.0",
   "id": "branded",
   "background": { "type": "image", "src": "app.png", "width": 1280, "height": 800 },
   "style": "./brand.json",

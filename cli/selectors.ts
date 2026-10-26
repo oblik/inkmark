@@ -67,9 +67,9 @@ export async function checkSelectors(loaded: LoadedScene, scenePath: string): Pr
   for (const f of found) {
     const n = counts[f.selector];
     if (n === -1) {
-      errors.push({ path: f.path, message: `Selector "${f.selector}" is not valid CSS. Fix it, or run "marginalia targets ${rel(scenePath)}" to list selectors.` });
+      errors.push({ path: f.path, message: `Selector "${f.selector}" is not valid CSS. Fix it, or run "inkmark targets ${rel(scenePath)}" to list selectors.` });
     } else if (n === 0) {
-      errors.push({ path: f.path, message: `Selector "${f.selector}" matches no element. Run "marginalia targets ${rel(scenePath)}" to list selectors.` });
+      errors.push({ path: f.path, message: `Selector "${f.selector}" matches no element. Run "inkmark targets ${rel(scenePath)}" to list selectors.` });
     }
   }
   return errors;

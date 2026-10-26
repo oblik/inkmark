@@ -106,7 +106,7 @@ export function labelFontCss(style: Style, dir: string): string {
 }
 
 export function loadBundle(): string {
-  const file = join(root, 'dist', 'marginalia.iife.js');
+  const file = join(root, 'dist', 'inkmark.iife.js');
   if (!existsSync(file)) {
     console.error('Run npm run build first.');
     process.exit(1);
@@ -119,7 +119,7 @@ export function preparePage(scenePath: string): { loaded: LoadedScene; data: Pag
   const loaded = loadScene(scenePath);
   const { scene, dir } = loaded;
   if (loaded.problems.length) throw new Error(loaded.problems.map((p) => p.message).join(' '));
-  if (!scene || !scene.background || !Array.isArray(scene.steps)) throw new Error(`"${scenePath}" is not a scene. Run "marginalia validate" first.`);
+  if (!scene || !scene.background || !Array.isArray(scene.steps)) throw new Error(`"${scenePath}" is not a scene. Run "inkmark validate" first.`);
   const bundle = loadBundle();
   const copy = structuredClone(scene);
   const style = resolveStyle(copy.style, loaded.styles);
@@ -161,7 +161,7 @@ export function buildPage(d: PageData, o: PageOptions): string {
 <script>
 (async () => {
   const scene = ${json(d.scene)};
-  const p = await Marginalia.createPlayer(document.getElementById('player'), scene, { controls: true, keyboard: true, autoplay: ${!!o.autoplay}, loop: ${!!o.loop} });
+  const p = await Inkmark.createPlayer(document.getElementById('player'), scene, { controls: true, keyboard: true, autoplay: ${!!o.autoplay}, loop: ${!!o.loop} });
   window.__player = p;
   window.__ready = true;
 })().catch((e) => { window.__error = String(e && e.message || e); document.body.textContent = window.__error; });
@@ -170,12 +170,12 @@ export function buildPage(d: PageData, o: PageOptions): string {
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><title>${escapeHtml(d.scene.id)}</title>
 <style>html,body{margin:0;width:${d.width}px;height:${d.height}px;overflow:hidden}</style>${font}
-</head><body><div id="root" ${o.rootAttrs ?? ''} style="width:${d.width}px;height:${d.height}px"><div id="mg"></div></div>
+</head><body><div id="root" ${o.rootAttrs ?? ''} style="width:${d.width}px;height:${d.height}px"><div id="ik"></div></div>
 <script>${safeScript(d.bundle)}</script>
 <script>
 (async () => {
   const scene = ${json(d.scene)};
-  const handle = await Marginalia.mountScene(document.getElementById('mg'), scene, { fit: 'none' });
+  const handle = await Inkmark.mountScene(document.getElementById('ik'), scene, { fit: 'none' });
   document.body.style.background = getComputedStyle(handle.stage).backgroundColor;
   await document.fonts.ready;
   window.__mg = handle;

@@ -9,7 +9,7 @@
   },
   "defaults": { "stroke": "ink", "highlight": "highlight", "label": "ink", "paper": "paper" },
   "stroke": { "width": 6, "roughness": 1.2, "bowing": 1, "thinning": 0.5, "highlightWidth": 28 },
-  "font": { "family": "\"Caveat Variable\", Caveat, \"Segoe Print\", cursive", "size": 40, "weight": 600, "lineHeight": 1.1 },
+  "font": { "family": "\"Permanent Marker\", \"Segoe Print\", cursive", "size": 34, "weight": 400, "lineHeight": 1.15 },
   "timing": {
     "durations": {
       "circle": 0.7,

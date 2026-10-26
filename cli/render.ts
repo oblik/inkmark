@@ -84,7 +84,7 @@ async function renderHyperframes(data: PageData, ffmpeg: string, out: string, fp
   const bin = join(dirname(pkg), 'dist', 'cli.js');
   const total = await withCapture(data, async (_p, info) => Math.round((lead + info.duration / 1000) * fps));
   const seconds = total / fps;
-  const tmp = mkdtempSync(join(tmpdir(), 'marginalia-hf-'));
+  const tmp = mkdtempSync(join(tmpdir(), 'inkmark-hf-'));
   try {
     const attrs = `data-composition-id="main" data-no-timeline data-start="0" data-duration="${seconds}" data-width="${data.width}" data-height="${data.height}"`;
     const after = `window.__hfAnime = [{ seek(ms) { handle.seek(ms - ${lead * 1000}); }, pause() {} }];`;
@@ -115,7 +115,7 @@ export async function renderCommand(args: string[]): Promise<number> {
     options: { out: { type: 'string' }, fps: { type: 'string' }, lead: { type: 'string' }, engine: { type: 'string' } },
   });
   if (positionals.length !== 1) {
-    console.error('Usage: marginalia render <scene> [--out file.mp4] [--fps 30] [--lead 0.4] [--engine builtin|hyperframes]');
+    console.error('Usage: inkmark render <scene> [--out file.mp4] [--fps 30] [--lead 0.4] [--engine builtin|hyperframes]');
     return 1;
   }
   const fps = positive(values.fps, 'fps', 30);

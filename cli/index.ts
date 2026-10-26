@@ -6,9 +6,9 @@ import { renderCommand } from './render.ts';
 import { targetsCommand } from './targets.ts';
 import { validateCommand } from './validate.ts';
 
-const HELP = `marginalia: hand-drawn annotations over an image, page or chart.
+const HELP = `inkmark: hand-drawn annotations over an image, page or chart.
 
-Usage: marginalia <command> [options]
+Usage: inkmark <command> [options]
 
 Commands:
   targets <bg|scene>   List elements (html, svg) or anchors you can point at.
@@ -27,24 +27,24 @@ Options:
   --no-browser         validate: skip the selector check in the browser.
   -h, --help           Show this help.
 
-Run "marginalia <command> --help" for the options of one command.
+Run "inkmark <command> --help" for the options of one command.
 `;
 
 const COMMAND_HELP: Record<string, string> = {
-  targets: `Usage: marginalia targets <background-or-scene> [--json] [--width px --height px]
+  targets: `Usage: inkmark targets <background-or-scene> [--json] [--width px --height px]
 List elements you can point at: selectors, text and boxes for html and svg, anchors for charts.
 Give a scene file to use its background size. A bare html file uses 1280x800 unless you set --width and --height.`,
-  grid: `Usage: marginalia grid <image> [--step 50] [--out file]
+  grid: `Usage: inkmark grid <image> [--step 50] [--out file]
 Write <name>.grid.png next to the image, with lines every --step px and labels every 100 px.
 For .svg and .html files also give --width and --height.`,
-  validate: `Usage: marginalia validate <scene.json> [--no-browser]
+  validate: `Usage: inkmark validate <scene.json> [--no-browser]
 Check a scene. One line per problem. Exit code 1 when there are errors.
 For html and svg backgrounds it also checks every selector in a headless browser. --no-browser skips that.`,
-  preview: `Usage: marginalia preview <scene> [--out dir] [--scale 1]
+  preview: `Usage: inkmark preview <scene> [--out dir] [--scale 1]
 Write one PNG per step. --out sets the folder (default: "out" next to the scene). --scale sets the pixel ratio.`,
-  play: `Usage: marginalia play <scene> [--out file.html] [--autoplay] [--loop]
+  play: `Usage: inkmark play <scene> [--out file.html] [--autoplay] [--loop]
 Write one self-contained HTML player.`,
-  render: `Usage: marginalia render <scene> [--out file.mp4] [--fps 30] [--lead 0.4] [--engine builtin|hyperframes]
+  render: `Usage: inkmark render <scene> [--out file.mp4] [--fps 30] [--lead 0.4] [--engine builtin|hyperframes]
 Write an MP4. Needs ffmpeg (or set FFMPEG_PATH). --lead is seconds of the empty background at the start.`,
 };
 
@@ -98,7 +98,7 @@ async function main(): Promise<number> {
     case 'targets':
       return targetsCommand(positionals, { json: values.json, width, height });
     default:
-      console.error(`Unknown command "${command}". Run "marginalia --help".`);
+      console.error(`Unknown command "${command}". Run "inkmark --help".`);
       return 1;
   }
 }
@@ -110,7 +110,7 @@ main().then(
   (e) => {
     let msg = e instanceof Error ? e.message : String(e);
     if (e instanceof Error && String((e as { code?: string }).code).startsWith('ERR_PARSE_ARGS')) {
-      msg = `${msg.split(/\.\s/)[0].replace(/\.$/, '')}. Run "marginalia ${process.argv[2] ?? ''} --help".`;
+      msg = `${msg.split(/\.\s/)[0].replace(/\.$/, '')}. Run "inkmark ${process.argv[2] ?? ''} --help".`;
     }
     console.error(`Error: ${msg.split(process.cwd() + '/').join('')}`);
     process.exitCode = 1;

@@ -1,5 +1,5 @@
 {
-  "marginalia": "1.0",
+  "inkmark": "1.0",
   "id": "demo-page",
   "background": { "type": "html", "src": "page.html", "width": 800, "height": 500 },
   "steps": [
