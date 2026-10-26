@@ -59,6 +59,7 @@ Marks: `circle`, `box`, `underline`, `highlight`, `strike`, `bracket`, `arrow`, 
 4. Name color tokens (`ink`, `accent`, `highlight`). Never write hex values.
 5. Start a new idea with `"clear": true` to fade out old marks.
 6. Raise `hold` (seconds) for steps with long labels. The default is 1.2.
+7. Add `"overlay": true` to a step (or the scene) to dim everything except the targets. Use it for one key target per step.
 
 ## Common mistakes
 

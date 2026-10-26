@@ -5,11 +5,44 @@
     "ink": "#E5484D",
     "accent": "#2F6FEB",
     "highlight": "#FFD43B",
-    "paper": "#FFFFFF"
+    "paper": "#FFFFFF",
+    "shade": "#14141A"
   },
-  "defaults": { "stroke": "ink", "highlight": "highlight", "label": "ink", "paper": "paper" },
-  "stroke": { "width": 6, "roughness": 1.2, "bowing": 1, "thinning": 0.5, "highlightWidth": 28 },
-  "font": { "family": "\"Permanent Marker\", \"Segoe Print\", cursive", "size": 34, "weight": 400, "lineHeight": 1.15 },
+  "dark": {
+    "colors": {
+      "ink": "#FF6B70",
+      "accent": "#7FA8FF",
+      "highlight": "#FFD43B",
+      "paper": "#101012",
+      "shade": "#000000"
+    }
+  },
+  "defaults": {
+    "stroke": "ink",
+    "highlight": "highlight",
+    "label": "ink",
+    "paper": "paper"
+  },
+  "stroke": {
+    "width": 6,
+    "roughness": 1.2,
+    "bowing": 1,
+    "thinning": 0.5,
+    "highlightWidth": 28
+  },
+  "font": {
+    "family": "\"Permanent Marker\", \"Segoe Print\", cursive",
+    "size": 34,
+    "weight": 400,
+    "lineHeight": 1.15
+  },
+  "overlay": {
+    "opacity": 0.6,
+    "color": "shade",
+    "pad": 10,
+    "radius": 12,
+    "fade": 0.3
+  },
   "timing": {
     "durations": {
       "circle": 0.7,

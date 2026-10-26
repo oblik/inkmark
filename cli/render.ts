@@ -7,7 +7,7 @@ import { parseArgs } from 'node:util';
 import { withCapture } from './capture.ts';
 import { findFfmpeg, startEncoder } from './ffmpeg.ts';
 import { rel } from './load.ts';
-import { buildPage, preparePage } from './page.ts';
+import { buildPage, parseScheme, preparePage } from './page.ts';
 import { preflightSelectors } from './selectors.ts';
 import type { PageData } from './page.ts';
 import { launchBrowser } from './browser.ts';
@@ -112,10 +112,10 @@ export async function renderCommand(args: string[]): Promise<number> {
   const { values, positionals } = parseArgs({
     args,
     allowPositionals: true,
-    options: { out: { type: 'string' }, fps: { type: 'string' }, lead: { type: 'string' }, engine: { type: 'string' } },
+    options: { out: { type: 'string' }, fps: { type: 'string' }, lead: { type: 'string' }, engine: { type: 'string' }, scheme: { type: 'string' } },
   });
   if (positionals.length !== 1) {
-    console.error('Usage: inkmark render <scene> [--out file.mp4] [--fps 30] [--lead 0.4] [--engine builtin|hyperframes]');
+    console.error('Usage: inkmark render <scene> [--out file.mp4] [--fps 30] [--lead 0.4] [--engine builtin|hyperframes] [--scheme light|dark]');
     return 1;
   }
   const fps = positive(values.fps, 'fps', 30);
@@ -128,6 +128,7 @@ export async function renderCommand(args: string[]): Promise<number> {
     return 1;
   }
   const { loaded, data } = preparePage(positionals[0]);
+  data.scheme = parseScheme(values.scheme);
   await preflightSelectors(loaded, positionals[0]);
   const out = resolve(values.out ?? join(loaded.dir, `${loaded.scene.id}.mp4`));
   mkdirSync(dirname(out), { recursive: true });

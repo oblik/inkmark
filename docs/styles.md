@@ -17,6 +17,10 @@ A style is a set of tokens: colors, pen, stroke, font and timing. A scene picks 
 | `font.family` | CSS font family for labels. |
 | `font.size`, `font.weight`, `font.lineHeight` | Label text. Size is in pixels. |
 | `font.src` | URL of a font file to load. |
+| `overlay.opacity`, `overlay.color` | Strength and color token of the spotlight dim layer (0.6, `shade`). |
+| `overlay.pad`, `overlay.radius` | Space around a hole and its corner radius in pixels (10, 12). |
+| `overlay.fade` | Seconds the dim layer takes to fade in and out (0.3). |
+| `dark.colors` | Color values used in the dark scheme. Merged over `colors`. |
 | `timing.durations` | Draw time in seconds for each mark type. |
 | `timing.labelPerChar` | Seconds per character for labels. |
 | `timing.hold` | Default step hold in seconds. |
@@ -29,10 +33,20 @@ A style is a set of tokens: colors, pen, stroke, font and timing. A scene picks 
 
 | Style | Pen | Stroke width | Colors |
 | --- | --- | --- | --- |
-| `marker` | `freehand` | 6 | `ink` red, `accent` blue, `highlight` yellow, `paper` white |
+| `marker` | `freehand` | 6 | `ink` red, `accent` blue, `highlight` yellow, `paper` white, `shade` near black |
 | `sketch` | `rough` | 2.5 | same as `marker` |
 
 `marker` uses the Permanent Marker font at 34 pixels. Defaults: stroke and label use `ink`, highlight uses `highlight`, paper uses `paper`. `sketch` extends `marker` and changes only the pen and stroke.
+
+## Dark scheme
+
+Add `dark.colors` to a style. In the dark scheme these values replace the same names in `colors`. Names you leave out keep their light value.
+
+```json
+{ "extends": "marker", "dark": { "colors": { "ink": "#FF8A8E" } } }
+```
+
+`marker` has dark values for `ink`, `accent`, `highlight`, `paper` and `shade`. On a dark page the highlight band is a plain, fainter layer. On a light page it uses a multiply blend. The `shade` token is the dim color of the overlay.
 
 ## Rules
 

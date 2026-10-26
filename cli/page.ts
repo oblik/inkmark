@@ -16,6 +16,15 @@ export interface PageData {
   height: number;
   fontCss: string;
   bundle: string;
+  /** Color scheme. Default: light for capture, auto for the player. A scene's own `scheme` wins. */
+  scheme?: 'light' | 'dark' | 'auto';
+}
+
+/** Reads the --scheme value. */
+export function parseScheme(v: string | undefined): 'light' | 'dark' | undefined {
+  if (v === undefined) return undefined;
+  if (v !== 'light' && v !== 'dark') throw new Error('--scheme must be "light" or "dark".');
+  return v;
 }
 
 const MIME: Record<string, string> = {
@@ -154,14 +163,14 @@ export function buildPage(d: PageData, o: PageOptions): string {
     return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${escapeHtml(d.scene.id)}</title>
-<style>html,body{margin:0}body{background:#ececec;color:#222;font:15px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center}
+<style>html,body{margin:0}body{background:${d.scheme === 'dark' ? '#17171a' : '#ececec'};color:${d.scheme === 'dark' ? '#ddd' : '#222'};font:15px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center}
 #player{width:min(${d.width}px,calc(100vw - 32px));margin:16px}</style>${font}
 </head><body><div id="player"></div>
 <script>${safeScript(d.bundle)}</script>
 <script>
 (async () => {
   const scene = ${json(d.scene)};
-  const p = await Inkmark.createPlayer(document.getElementById('player'), scene, { controls: true, keyboard: true, autoplay: ${!!o.autoplay}, loop: ${!!o.loop} });
+  const p = await Inkmark.createPlayer(document.getElementById('player'), scene, { scheme: ${json(d.scheme ?? 'auto')}, controls: true, keyboard: true, autoplay: ${!!o.autoplay}, loop: ${!!o.loop} });
   window.__player = p;
   window.__ready = true;
 })().catch((e) => { window.__error = String(e && e.message || e); document.body.textContent = window.__error; });
@@ -175,7 +184,7 @@ export function buildPage(d: PageData, o: PageOptions): string {
 <script>
 (async () => {
   const scene = ${json(d.scene)};
-  const handle = await Inkmark.mountScene(document.getElementById('ik'), scene, { fit: 'none' });
+  const handle = await Inkmark.mountScene(document.getElementById('ik'), scene, { fit: 'none', scheme: ${json(d.scheme ?? 'light')} });
   document.body.style.background = getComputedStyle(handle.stage).backgroundColor;
   await document.fonts.ready;
   window.__mg = handle;

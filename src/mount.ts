@@ -1,4 +1,4 @@
-import type { Box, Point, Scene, Style, StyleInput, StepTime } from './types.ts';
+import type { Box, OverlayInput, Point, Scene, Style, StyleInput, StepTime } from './types.ts';
 import type { Timeline } from 'animejs';
 import { resolveStyle } from './styles/index.ts';
 import { markSeed } from './seed.ts';
@@ -6,6 +6,7 @@ import { createStage, resolveUrl } from './stage.ts';
 import { createResolver, toFramePoint, toFrameBox, type MarkRecord } from './targets.ts';
 import { renderStrokes } from './geometry/pen.ts';
 import { buildGeometry } from './geometry/index.ts';
+import { createDim, pickOverlay } from './overlay.ts';
 import { buildTimeline, type PlannedStep } from './timeline.ts';
 
 export interface MountOptions {
@@ -13,6 +14,10 @@ export interface MountOptions {
   styles?: Record<string, StyleInput>;
   style?: StyleInput;
   fit?: 'width' | 'none';
+  /** Color scheme. Default 'auto': prefers-color-scheme at mount time. A scene's own `scheme` wins. */
+  scheme?: 'light' | 'dark' | 'auto';
+  /** Spotlight for all steps. Wins over the step and scene settings. `false` turns it off. */
+  overlay?: boolean | OverlayInput;
 }
 
 export interface SceneHandle {
@@ -64,7 +69,12 @@ async function loadSceneStyle(scene: Scene, options: MountOptions): Promise<Styl
 }
 
 export async function mountScene(container: HTMLElement, scene: Scene, options: MountOptions = {}): Promise<SceneHandle> {
-  const style = await loadSceneStyle(scene, options);
+  const base = await loadSceneStyle(scene, options);
+  const pref = scene.scheme ?? (options.scheme && options.scheme !== 'auto' ? options.scheme : undefined);
+  const scheme: 'light' | 'dark' = pref ?? (typeof matchMedia === 'function' && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  const style: Style = scheme === 'dark' && base.dark?.colors ? { ...base, colors: { ...base.colors, ...base.dark.colors } } : base;
+  container.classList.add('ik-player');
+  container.dataset.ikScheme = scheme;
   injectFont(style, options.baseUrl);
 
   const labels = scene.steps.flatMap((s) => s.marks).filter((m) => m.type === 'label');
@@ -77,7 +87,7 @@ export async function mountScene(container: HTMLElement, scene: Scene, options: 
 
   const color = (name: string | undefined, fallback: string): string => style.colors[name ?? fallback] ?? name ?? style.colors[fallback] ?? '#000';
   const paper = style.colors[style.defaults.paper] ?? '#fff';
-  const stage = await createStage(container, scene, { baseUrl: options.baseUrl, fit: options.fit, frameColor: paper });
+  const stage = await createStage(container, scene, { baseUrl: options.baseUrl, fit: options.fit, frameColor: paper, scheme });
 
   // Anchors
   let anchors: Record<string, Point | Box> = {};
@@ -131,7 +141,20 @@ export async function mountScene(container: HTMLElement, scene: Scene, options: 
       const nodes = stage.addMark(mark.id, geometry, parts, token, style, uid);
       marks.push({ id: mark.id, type: mark.type, with: mark.with, delay: mark.delay, duration: mark.duration, nodes });
     }
-    planned.push({ step, marks });
+    const spec = pickOverlay(options.overlay, step.overlay, scene.overlay, style, style.colors);
+    const holes: Box[] = [];
+    if (spec) {
+      for (const mark of step.marks) {
+        if (mark.type === 'arrow') {
+          const r = region(mark.to, true);
+          if (!r.isPoint) holes.push(r.box);
+        } else if (mark.type !== 'label' && mark.type !== 'scribble') holes.push(records.get(mark.id)!.geometry.targetBox);
+      }
+    }
+    const dim = spec && holes.length
+      ? createDim(stage.dimLayer, stage.defs, `${uid}-dim-${planned.length}`, stage.frameSize, holes, spec, style)
+      : undefined;
+    planned.push({ step, marks, overlay: dim });
   }
 
   stage.overlay.setAttribute('role', 'img');

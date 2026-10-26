@@ -24,5 +24,5 @@ export async function withCapture<T>(
     if (err) throw new Error(String(err));
     const info = (await page.evaluate('({ duration: window.__mg.duration, steps: window.__mg.steps })')) as CaptureInfo;
     return fn(page, info);
-  }, { deviceScaleFactor: options.scale ?? 1 });
+  }, { deviceScaleFactor: options.scale ?? 1, colorScheme: data.scene.scheme ?? (data.scheme === 'dark' ? 'dark' : 'light') });
 }

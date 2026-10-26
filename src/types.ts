@@ -85,12 +85,21 @@ export type Mark =
   | LabelMark
   | ScribbleMark;
 
+export interface OverlayInput {
+  /** Dim strength, 0 to 1. Default: style overlay opacity. */
+  opacity?: number;
+  /** Style color token for the dim layer. Default: style overlay color. */
+  color?: string;
+}
+
 export interface Step {
   id: string;
   /** Seconds the finished step stays on screen (auto-play and video). Default: style timing. */
   hold?: number;
   /** Fade out all earlier marks before this step draws. */
   clear?: boolean;
+  /** Spotlight: dim the background except around this step's targets. Wins over the scene. */
+  overlay?: boolean | OverlayInput;
   marks: Mark[];
 }
 
@@ -102,6 +111,10 @@ export interface Scene {
   frame?: Frame;
   /** Built-in style name, a path to a style JSON file, or an inline style. Default: "marker". */
   style?: string | StyleInput;
+  /** Spotlight for every step. Default: off. */
+  overlay?: boolean | OverlayInput;
+  /** Fixed color scheme, for backgrounds that never change (images). */
+  scheme?: 'light' | 'dark';
   steps: Step[];
 }
 
@@ -119,6 +132,10 @@ export interface Style {
   /** Stroke sizes are output pixels (frame space). */
   stroke: { width: number; roughness: number; bowing: number; thinning: number; highlightWidth: number };
   font: { family: string; size: number; weight?: number; lineHeight?: number; src?: string };
+  /** Spotlight. `color` is a color token, `fade` is in seconds. */
+  overlay: { opacity: number; color: string; pad: number; radius: number; fade: number };
+  /** Values used in the dark scheme. */
+  dark?: { colors?: Record<string, string> };
   timing: {
     durations: Record<MarkType, number>;
     /** Seconds per character for labels. */
@@ -133,9 +150,10 @@ export interface Style {
 }
 
 /** A partial style. `extends` names the base style (default "marker"). */
-export type StyleInput = { extends?: string } & Partial<Omit<Style, 'stroke' | 'font' | 'timing' | 'defaults'>> & {
+export type StyleInput = { extends?: string } & Partial<Omit<Style, 'stroke' | 'font' | 'timing' | 'defaults' | 'overlay'>> & {
   defaults?: Partial<Style['defaults']>;
   stroke?: Partial<Style['stroke']>;
+  overlay?: Partial<Style['overlay']>;
   font?: Partial<Style['font']>;
   timing?: Partial<Omit<Style['timing'], 'durations'>> & { durations?: Partial<Record<MarkType, number>> };
 };

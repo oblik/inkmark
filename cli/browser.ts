@@ -51,13 +51,14 @@ export async function withPage<T>(
   width: number,
   height: number,
   fn: (page: Page, browser: Browser) => Promise<T>,
-  options: { deviceScaleFactor?: number } = {},
+  options: { deviceScaleFactor?: number; colorScheme?: 'light' | 'dark' } = {},
 ): Promise<T> {
   const browser = await launchBrowser();
   try {
     const context = await browser.newContext({
       viewport: { width: Math.round(width), height: Math.round(height) },
       deviceScaleFactor: options.deviceScaleFactor ?? 1,
+      colorScheme: options.colorScheme,
     });
     const page = await context.newPage();
     return await fn(page, browser);

@@ -1,6 +1,7 @@
 import { createTimeline, type Timeline } from 'animejs';
 import type { MarkType, Step, StepTime, Style } from './types.ts';
 import type { MarkNodes } from './stage.ts';
+import type { OverlayNode } from './overlay.ts';
 
 export interface PlannedMark {
   id: string;
@@ -14,6 +15,8 @@ export interface PlannedMark {
 export interface PlannedStep {
   step: Step;
   marks: PlannedMark[];
+  /** Spotlight of this step. Fades in with the step and out when the next step starts. */
+  overlay?: OverlayNode;
 }
 
 export interface BuiltTimeline {
@@ -33,10 +36,15 @@ export function buildTimeline(planned: PlannedStep[], style: Style): BuiltTimeli
   const earlier: SVGGElement[] = [];
   const t = style.timing;
   let start = 0;
+  let prevDim: OverlayNode | undefined;
   const labelStarts: { g: SVGGElement; at: number }[] = [];
 
-  for (const { step, marks } of planned) {
+  for (const { step, marks, overlay } of planned) {
     tl.label(step.id, start);
+    // The spotlight fades in with the first mark. The old one fades out at the same time.
+    if (prevDim) tl.add(prevDim.el, { opacity: [prevDim.opacity, 0], duration: prevDim.fadeMs, ease: 'linear' }, start);
+    if (overlay) tl.add(overlay.el, { opacity: [0, overlay.opacity], duration: overlay.fadeMs, ease: 'linear' }, start);
+    prevDim = overlay;
     let cursor = start;
     if (step.clear && earlier.length) {
       tl.add(earlier.slice(), { opacity: [1, 0], duration: FADE_MS, ease: 'linear' }, start);

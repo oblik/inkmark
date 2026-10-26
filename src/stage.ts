@@ -17,10 +17,6 @@ const CSS = `
 .ik-bg{position:absolute;transform-origin:0 0}
 .ik-bg>*{display:block;border:0;pointer-events:none}
 .ik-overlay{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
-.ik-controls{display:flex;align-items:center;gap:8px;margin-top:12px;font:14px/1.2 system-ui,sans-serif}
-.ik-btn{font:inherit;padding:6px 14px;border:1px solid currentColor;border-radius:6px;background:transparent;color:inherit;cursor:pointer}
-.ik-btn:disabled{opacity:.4;cursor:default}
-.ik-count{margin-left:auto;font-variant-numeric:tabular-nums}
 `;
 
 let cssInjected = false;
@@ -57,6 +53,9 @@ export interface Stage {
   selectorBox(selector: string): Box | null;
   /** Boxes of text in the background, in background space. Empty for images. */
   textBoxes(): Box[];
+  /** Layer and defs for the spotlight dim layers. */
+  dimLayer: SVGElement;
+  defs: SVGElement;
   addMark(id: string, geom: MarkGeometry, parts: PenPart[], color: string, style: Style, uid: string): MarkNodes;
   destroy(): void;
 }
@@ -65,6 +64,7 @@ export interface StageOptions {
   baseUrl?: string;
   fit?: 'width' | 'none';
   frameColor: string;
+  scheme: 'light' | 'dark';
 }
 
 function waitFor(target: EventTarget, ok = 'load'): Promise<void> {
@@ -84,6 +84,7 @@ export async function createStage(container: HTMLElement, scene: Scene, opts: St
   root.className = 'ik-root';
   const frame = document.createElement('div');
   frame.className = 'ik-stage';
+  frame.style.colorScheme = opts.scheme;
   frame.style.width = `${frameSize.width}px`;
   frame.style.height = `${frameSize.height}px`;
   frame.style.background = scene.frame?.color ?? opts.frameColor;
@@ -102,10 +103,14 @@ export async function createStage(container: HTMLElement, scene: Scene, opts: St
     viewBox: `0 0 ${frameSize.width} ${frameSize.height}`,
   }) as SVGSVGElement;
   const defs = svgEl('defs');
+  const gDim = svgEl('g', { class: 'ik-layer-dim' });
   const gHighlight = svgEl('g', { class: 'ik-layer-highlight' });
-  gHighlight.style.mixBlendMode = 'multiply';
+  // Multiply keeps dark text readable on a light page but vanishes on a dark one.
+  // On dark pages the band is a plain, fainter layer, so light text stays readable.
+  const dark = opts.scheme === 'dark';
+  if (!dark) gHighlight.style.mixBlendMode = 'multiply';
   const gMarks = svgEl('g', { class: 'ik-layer-marks' });
-  overlay.append(defs, gHighlight, gMarks);
+  overlay.append(defs, gDim, gHighlight, gMarks);
   frame.appendChild(overlay);
 
   // Layout size first so measuring works.
@@ -145,6 +150,7 @@ export async function createStage(container: HTMLElement, scene: Scene, opts: St
     iframe.setAttribute('scrolling', 'no');
     iframe.setAttribute('tabindex', '-1');
     iframe.setAttribute('aria-hidden', 'true');
+    iframe.style.colorScheme = opts.scheme;
     iframe.style.width = `${bg.width}px`;
     iframe.style.height = `${bg.height}px`;
     const loaded = waitFor(iframe);
@@ -155,6 +161,10 @@ export async function createStage(container: HTMLElement, scene: Scene, opts: St
     await loaded;
     const doc = iframe.contentDocument;
     if (!doc) throw new Error('The html background must be same-origin.');
+    // `prefers-color-scheme` in the page follows the browser, not us. These two follow the scene:
+    // `light-dark()` and a `[data-ik-scheme]` selector.
+    doc.documentElement.style.colorScheme = opts.scheme;
+    doc.documentElement.dataset.ikScheme = opts.scheme;
     await doc.fonts?.ready;
     textBoxes = () => {
       const out: Box[] = [];
@@ -250,7 +260,7 @@ export async function createStage(container: HTMLElement, scene: Scene, opts: St
     if (geom.band) {
       const p = svgEl('path', {
         d: geom.band.d, fill: 'none', stroke: color, 'stroke-width': geom.band.width,
-        'stroke-linecap': 'butt', opacity: geom.band.opacity,
+        'stroke-linecap': 'butt', opacity: dark ? geom.band.opacity * 0.6 : geom.band.opacity,
       });
       group.appendChild(p);
       nodes.segments.push({ targets: [draw(p)], weight: 1 });
@@ -303,7 +313,7 @@ export async function createStage(container: HTMLElement, scene: Scene, opts: St
   }
 
   return {
-    root, frame, overlay, frameSize, map, selectorBox, textBoxes, addMark,
+    root, frame, overlay, dimLayer: gDim, defs, frameSize, map, selectorBox, textBoxes, addMark,
     destroy() {
       observer?.disconnect();
       root.remove();

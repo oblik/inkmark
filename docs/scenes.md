@@ -13,6 +13,8 @@ Units: all sizes and coordinates are pixels in the background's own space. All t
 | `background` | object | none | Required. See below. |
 | `frame` | object | background size | Output size. |
 | `style` | text or object | `"marker"` | A built-in name, a path to a style file, a name from `createPlayer` options, or an inline style. |
+| `overlay` | boolean or object | off | Spotlight for every step. See [Overlay](#overlay). |
+| `scheme` | `light` or `dark` | follows the page | Fixes the color scheme. Use it for image backgrounds that never change. |
 | `steps` | list | none | Required. At least one step. |
 
 ## Background
@@ -45,6 +47,27 @@ Marks draw in frame pixels, so stroke width and font size stay the same for any 
 | `marks` | list | none | Required. At least one. Use 3 or fewer. |
 | `hold` | seconds | style `timing.hold` (1.2) | Time the finished step stays on screen. |
 | `clear` | boolean | `false` | Fades out all earlier marks before this step draws. |
+| `overlay` | boolean or object | scene `overlay` | Spotlight for this step. `false` turns it off for this step. |
+
+## Overlay
+
+The overlay dims the background and leaves rounded holes around the targets of the current step. It sits under all marks.
+
+1. Set `"overlay": true` on the scene or on one step. Use `{ "opacity": 0.5, "color": "shade" }` to change it. `opacity` is 0 to 1. `color` is a style color token.
+2. Holes are drawn around the targets of circle, box, underline, highlight, strike and bracket marks. For an arrow, the hole is around its `to` target, unless that is a point. Labels and scribbles get no hole.
+3. The dim layer fades in with the first mark of the step. It adds no time. When the next step starts, the old layer fades out and the new one fades in.
+4. A step with `"overlay": false` has no dim layer. A step with no hole targets has none either.
+5. Order of precedence: the `overlay` option of `mountScene` or `createPlayer`, then the step, then the scene. The option `overlay: false` turns the overlay off everywhere.
+6. Size and softness come from the style `overlay` tokens. See [docs/styles.md](styles.md).
+
+## Color scheme
+
+The scheme is `light` or `dark`. Order of precedence: the scene `scheme`, the `scheme` option of `mountScene` (`light`, `dark` or `auto`), then the page setting (`auto`, the default).
+
+1. In the dark scheme the style colors are merged with `style.dark.colors`.
+2. The container gets the class `ik-player` and the attribute `data-ik-scheme`. The stage gets the CSS `color-scheme`.
+3. An html background gets `color-scheme` on its root element and `data-ik-scheme` on `<html>`. Use `light-dark()` or `[data-ik-scheme="dark"]` in the page. A `prefers-color-scheme` media query follows the browser, not the scene.
+4. The CLI takes `--scheme light|dark` for `preview`, `play` and `render`.
 
 ## Marks
 
@@ -140,6 +163,7 @@ Errors (the scene does not work):
 1. `inkmark` is not `"1.0"`, or `id` is empty.
 2. The background is missing, has a wrong `type`, has no `width` or `height`, or has neither `src` nor `content`.
 3. `frame` has a size that is not positive, or a wrong `fit`.
+   `scheme` is not `light` or `dark`. An overlay has an `opacity` outside 0 to 1, or a `color` that is not a style token.
 4. The style does not resolve (unknown name, or a loop of `extends`).
 5. `steps` is empty, or a step has no marks.
 6. A scene, step or mark id is empty, used twice, or has characters other than letters, digits, `-` and `_`.

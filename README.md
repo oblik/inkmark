@@ -93,6 +93,14 @@ Two styles are built in. `marker` is a thick marker pen. `sketch` is a thin sket
 
 To use your own colors and font, extend a built-in style and change only what you need. See [docs/styles.md](docs/styles.md) and [examples/brand.json](examples/brand.json).
 
+## Overlay
+
+Set `"overlay": true` on the scene or on a step to dim the background and leave holes around the targets of the step. It fades in with the first mark. Details: [docs/scenes.md](docs/scenes.md#overlay).
+
+## Light and dark
+
+Pass `scheme: 'light' | 'dark' | 'auto'` to `mountScene` or `createPlayer`, or set `scheme` in a scene. In the dark scheme a style uses its `dark.colors`. The CLI takes `--scheme light|dark`. Details: [docs/scenes.md](docs/scenes.md#color-scheme).
+
 ## Requirements
 
 1. Node 22.18 or newer.

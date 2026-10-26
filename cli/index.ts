@@ -23,6 +23,7 @@ Options:
   --out <file>         grid: output file.
   --width <px>         grid, targets: page width for html and svg.
   --height <px>        grid, targets: page height for html and svg.
+  --scheme <name>      preview, play, render: light or dark. Default: the scene's scheme, else light (play: auto).
   --json               targets: print JSON.
   --no-browser         validate: skip the selector check in the browser.
   -h, --help           Show this help.
@@ -40,12 +41,14 @@ For .svg and .html files also give --width and --height.`,
   validate: `Usage: inkmark validate <scene.json> [--no-browser]
 Check a scene. One line per problem. Exit code 1 when there are errors.
 For html and svg backgrounds it also checks every selector in a headless browser. --no-browser skips that.`,
-  preview: `Usage: inkmark preview <scene> [--out dir] [--scale 1]
-Write one PNG per step. --out sets the folder (default: "out" next to the scene). --scale sets the pixel ratio.`,
-  play: `Usage: inkmark play <scene> [--out file.html] [--autoplay] [--loop]
-Write one self-contained HTML player.`,
-  render: `Usage: inkmark render <scene> [--out file.mp4] [--fps 30] [--lead 0.4] [--engine builtin|hyperframes]
-Write an MP4. Needs ffmpeg (or set FFMPEG_PATH). --lead is seconds of the empty background at the start.`,
+  preview: `Usage: inkmark preview <scene> [--out dir] [--scale 1] [--scheme light|dark]
+Write one PNG per step. --out sets the folder (default: "out" next to the scene). --scale sets the pixel ratio.
+--scheme picks the color scheme (default: the scene's scheme, else light).`,
+  play: `Usage: inkmark play <scene> [--out file.html] [--autoplay] [--loop] [--scheme light|dark]
+Write one self-contained HTML player. --scheme fixes the color scheme. Default: the scene's scheme, else follow the page (auto).`,
+  render: `Usage: inkmark render <scene> [--out file.mp4] [--fps 30] [--lead 0.4] [--engine builtin|hyperframes] [--scheme light|dark]
+Write an MP4. Needs ffmpeg (or set FFMPEG_PATH). --lead is seconds of the empty background at the start.
+--scheme picks the color scheme (default: the scene's scheme, else light).`,
 };
 
 async function main(): Promise<number> {

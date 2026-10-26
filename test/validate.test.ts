@@ -116,3 +116,17 @@ test('color warning counts distinct effective colors', () => {
   // ink + highlight + accent: 3 colors, warning
   assert.ok(validate(s).warnings.some((w) => /3 annotation colors/.test(w.message)));
 });
+
+test('overlay and scheme are checked', () => {
+  const ok = scene();
+  ok.overlay = { opacity: 0.5, color: 'shade' };
+  ok.steps[0].overlay = true;
+  ok.scheme = 'dark';
+  assert.equal(validate(ok).ok, true);
+
+  const bad = scene();
+  bad.overlay = { opacity: 2, color: 'nope' };
+  bad.scheme = 'blue';
+  const paths = validate(bad).errors.map((e) => e.path).sort();
+  assert.deepEqual(paths, ['overlay.color', 'overlay.opacity', 'scheme']);
+});

@@ -98,6 +98,26 @@ export function validate(scene: unknown, options: ValidateOptions = {}): Validat
   }
   const tokens = style ? Object.keys(style.colors) : [];
 
+  if (scene.scheme !== undefined && scene.scheme !== 'light' && scene.scheme !== 'dark') {
+    err('scheme', 'Field "scheme" must be "light" or "dark". Change it, or remove it to follow the page.');
+  }
+  const checkOverlay = (path: string, v: unknown) => {
+    if (v === undefined || typeof v === 'boolean') return;
+    if (!isObj(v)) {
+      err(path, 'Overlay must be true, false or an object { "opacity", "color" }. Fix the value.');
+      return;
+    }
+    if (v.opacity !== undefined && !(isNum(v.opacity) && v.opacity >= 0 && v.opacity <= 1)) {
+      err(`${path}.opacity`, 'Overlay "opacity" must be a number from 0 to 1. Fix the value.');
+    }
+    if (v.color !== undefined) {
+      if (!isStr(v.color) || (style && !tokens.includes(v.color))) {
+        err(`${path}.color`, `Overlay color "${String(v.color)}" is not a style color token. Use one of: ${tokens.join(', ')}.`);
+      }
+    }
+  };
+  checkOverlay('overlay', scene.overlay);
+
   // Steps
   if (!Array.isArray(scene.steps) || scene.steps.length === 0) {
     err('steps', 'Field "steps" must be a list with at least one step. Add a step with marks.');
@@ -196,6 +216,7 @@ export function validate(scene: unknown, options: ValidateOptions = {}): Validat
       stepIds.add(step.id);
       if (!ID_RE.test(step.id)) err(`${sp}.id`, badId(step.id));
     }
+    checkOverlay(`${sp}.overlay`, step.overlay);
     for (const k of ['hold'] as const) {
       if (step[k] !== undefined && !(isNum(step[k]) && (step[k] as number) >= 0)) err(`${sp}.${k}`, `Step "${k}" must be a number of seconds, 0 or more. Fix the value.`);
     }
