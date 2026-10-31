@@ -70,6 +70,8 @@ Marks: `circle`, `box`, `underline`, `highlight`, `strike`, `bracket`, `arrow`, 
 
 For one static picture (no steps, no player), write `"marks": [...]` instead of `"steps"`. `preview` writes it as one PNG, and `drawScene` shows it on a page.
 
+Styles: set `"style"` to `marker` (default), `sketch`, `highlighter`, `pencil`, `pen`, `chalk`, `whiteboard`, `modern`, `blueprint` or `comic`. All use the same color tokens.
+
 ## Readability limits
 
 1. 3 marks or fewer in one step. Split the rest into new steps.

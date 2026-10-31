@@ -132,8 +132,14 @@ export interface Style {
   colors: Record<string, string>;
   /** Token names used when a mark sets no color. */
   defaults: { stroke: string; highlight: string; label: string; paper: string };
-  /** Stroke sizes are output pixels (frame space). */
-  stroke: { width: number; roughness: number; bowing: number; thinning: number; highlightWidth: number };
+  /**
+   * Stroke sizes are output pixels (frame space).
+   * `opacity` makes strokes see-through (labels stay solid). `texture` adds grain: chalk or pencil.
+   */
+  stroke: {
+    width: number; roughness: number; bowing: number; thinning: number; highlightWidth: number;
+    opacity?: number; texture?: 'none' | 'chalk' | 'pencil';
+  };
   font: { family: string; size: number; weight?: number; lineHeight?: number; src?: string };
   /** Spotlight. `color` is a color token, `fade` is in seconds. */
   overlay: { opacity: number; color: string; pad: number; radius: number; fade: number };

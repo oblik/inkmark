@@ -1,0 +1,9 @@
+{
+  "extends": "marker",
+  "name": "pen",
+  "pen": "freehand",
+  "colors": { "ink": "#1F3FBF", "accent": "#D6336C", "highlight": "#FFE066" },
+  "dark": { "colors": { "ink": "#8AA4FF", "accent": "#FF7AA8", "highlight": "#FFD43B" } },
+  "stroke": { "width": 3, "roughness": 1, "bowing": 1, "thinning": 0.35 },
+  "font": { "family": "\"Nanum Pen Script\", cursive", "size": 46, "weight": 400 }
+}

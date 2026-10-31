@@ -1,0 +1,9 @@
+{
+  "extends": "marker",
+  "name": "whiteboard",
+  "pen": "freehand",
+  "colors": { "ink": "#1864AB", "accent": "#E03131", "highlight": "#FFEC99" },
+  "dark": { "colors": { "ink": "#74C0FC", "accent": "#FF8787", "highlight": "#FFD43B" } },
+  "stroke": { "width": 5, "roughness": 0.8, "bowing": 1, "thinning": 0.15 },
+  "font": { "family": "Kalam, cursive", "size": 34, "weight": 700 }
+}

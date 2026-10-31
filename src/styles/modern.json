@@ -1,0 +1,11 @@
+{
+  "extends": "marker",
+  "name": "modern",
+  "pen": "freehand",
+  "colors": { "ink": "#5B5BD6", "accent": "#E5484D", "highlight": "#FFE066" },
+  "dark": { "colors": { "ink": "#9B9EFF", "accent": "#FF6B70", "highlight": "#FFC21A" } },
+  "stroke": { "width": 4, "roughness": 0, "bowing": 0, "thinning": 0 },
+  "font": { "family": "\"Geist Variable\", Geist, Inter, system-ui, -apple-system, \"Segoe UI\", sans-serif", "size": 26, "weight": 600, "lineHeight": 1.25 },
+  "overlay": { "radius": 16 },
+  "timing": { "easing": "outCubic" }
+}

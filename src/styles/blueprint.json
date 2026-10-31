@@ -1,0 +1,9 @@
+{
+  "extends": "marker",
+  "name": "blueprint",
+  "pen": "rough",
+  "colors": { "ink": "#1971C2", "accent": "#F08C00", "highlight": "#A5D8FF" },
+  "dark": { "colors": { "ink": "#A5D8FF", "accent": "#FFC078", "highlight": "#339AF0" } },
+  "stroke": { "width": 2, "roughness": 0.6, "bowing": 0.4, "thinning": 0 },
+  "font": { "family": "\"Architects Daughter\", cursive", "size": 32, "weight": 400 }
+}

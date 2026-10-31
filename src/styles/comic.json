@@ -1,0 +1,9 @@
+{
+  "extends": "marker",
+  "name": "comic",
+  "pen": "freehand",
+  "colors": { "ink": "#111111", "accent": "#E03131", "highlight": "#FFE600" },
+  "dark": { "colors": { "ink": "#F5F5F5", "accent": "#FF6B6B", "highlight": "#FFD500" } },
+  "stroke": { "width": 7, "roughness": 1.4, "bowing": 1, "thinning": 0.25 },
+  "font": { "family": "Bangers, cursive", "size": 38, "weight": 400 }
+}

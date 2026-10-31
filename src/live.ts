@@ -371,7 +371,7 @@ export function annotate(target: LiveTarget, mark: LiveMark, options: AnnotateOp
     scheme = next;
     setVars();
     if (built && type === 'highlight') {
-      const band = built.nodes.group.firstElementChild;
+      const band = built.nodes.band;
       const op = (rest.opacity as number | undefined) ?? 0.5;
       band?.setAttribute('opacity', String(next === 'dark' ? op * 0.9 : op));
     }

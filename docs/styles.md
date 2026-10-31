@@ -14,6 +14,8 @@ A style is a set of tokens: colors, pen, stroke, font and timing. A scene picks 
 | `stroke.roughness`, `stroke.bowing` | How shaky and how curved the line is. |
 | `stroke.thinning` | How much the freehand pen thins at speed. |
 | `stroke.highlightWidth` | Width of a highlight band in pixels. |
+| `stroke.opacity` | 0 to 1. Makes strokes see-through. Labels stay solid. Default 1. |
+| `stroke.texture` | `none`, `chalk` or `pencil`. Adds grain to strokes and labels. Default `none`. |
 | `font.family` | CSS font family for labels. |
 | `font.size`, `font.weight`, `font.lineHeight` | Label text. Size is in pixels. |
 | `font.src` | URL of a font file to load. |
@@ -29,14 +31,70 @@ A style is a set of tokens: colors, pen, stroke, font and timing. A scene picks 
 
 ## Built-in styles
 
-`marker` is the default.
+`marker` is the default. All styles extend `marker`, so they have the same color token names: `ink`, `accent`, `highlight`, `paper` and `shade`. Each style has its own light and dark colors.
 
-| Style | Pen | Stroke width | Colors |
-| --- | --- | --- | --- |
-| `marker` | `freehand` | 6 | `ink` red, `accent` blue, `highlight` yellow, `paper` white, `shade` near black |
-| `sketch` | `rough` | 2.5 | same as `marker` |
+| Style | Pen | Stroke | Font | Colors (ink, accent) |
+| --- | --- | --- | --- | --- |
+| `marker` | `freehand` | 6 | Permanent Marker | red, blue |
+| `sketch` | `rough` | 2.5 | Permanent Marker | red, blue |
+| `highlighter` | `freehand` | 12, opacity 0.6 | Caveat Brush | pink, blue |
+| `pencil` | `rough` | 1.8, `pencil` grain | Shadows Into Light | graphite, red |
+| `pen` | `freehand` | 3 | Nanum Pen Script | blue, pink |
+| `chalk` | `rough` | 4, `chalk` grain | Cabin Sketch 700 | blue, pink. Dark: white, pink |
+| `whiteboard` | `freehand` | 5 | Kalam 700 | blue, red |
+| `modern` | `freehand` | 4, no wobble | Geist, then the system sans-serif | indigo, red |
+| `blueprint` | `rough` | 2 | Architects Daughter | blue, orange |
+| `comic` | `freehand` | 7 | Bangers | black, red. Dark: white, red |
 
-`marker` uses the Permanent Marker font at 34 pixels. Defaults: stroke and label use `ink`, highlight uses `highlight`, paper uses `paper`. `sketch` extends `marker` and changes only the pen and stroke.
+Defaults: stroke and label use `ink`, highlight uses `highlight`, paper uses `paper`.
+
+Styles with the `rough` pen load Rough.js the first time they draw, so pages that use only `freehand` styles never download it. The script-tag build includes it.
+
+## Fonts
+
+The library does not include font files. Each style names a font. Install the font package and import it on your page:
+
+```sh
+npm install @fontsource/cabin-sketch
+```
+
+```js
+import '@fontsource/cabin-sketch/700.css';
+```
+
+If the font is missing, labels use the next font in the family list, then the browser's cursive font. The CLI finds installed `@fontsource` packages by itself.
+
+These free fonts (SIL Open Font License) work well for labels. The `fonts` export has the same list with the family, package, weight and a good size:
+
+| Font | Package | Look |
+| --- | --- | --- |
+| Permanent Marker | `@fontsource/permanent-marker` | Thick felt marker. The default. |
+| Caveat | `@fontsource-variable/caveat` | Quick, neat handwriting. |
+| Caveat Brush | `@fontsource/caveat-brush` | Brush pen. |
+| Kalam | `@fontsource/kalam` | Whiteboard marker. |
+| Patrick Hand | `@fontsource/patrick-hand` | Clean print handwriting. |
+| Gochi Hand | `@fontsource/gochi-hand` | Round, friendly marker. |
+| Shadows Into Light | `@fontsource/shadows-into-light` | Thin pencil. |
+| Reenie Beanie | `@fontsource/reenie-beanie` | Loose ballpoint scrawl. |
+| Rock Salt | `@fontsource/rock-salt` | Rough, energetic marker. Wide. |
+| Gloria Hallelujah | `@fontsource/gloria-hallelujah` | Playful notebook writing. |
+| Architects Daughter | `@fontsource/architects-daughter` | Neat technical lettering. |
+| Cabin Sketch | `@fontsource/cabin-sketch` | Hatched chalk letters. |
+| Covered By Your Grace | `@fontsource/covered-by-your-grace` | Tall, bold felt pen. |
+| Nanum Pen Script | `@fontsource/nanum-pen-script` | Fine pen, narrow. |
+| Indie Flower | `@fontsource/indie-flower` | Soft, round handwriting. |
+| Sedgwick Ave | `@fontsource/sedgwick-ave` | Graffiti marker. |
+| Just Another Hand | `@fontsource/just-another-hand` | Tall, narrow capitals. |
+| Schoolbell | `@fontsource/schoolbell` | School chalkboard. |
+| Bangers | `@fontsource/bangers` | Comic book capitals. |
+
+To use a font with any style, set the family and a size:
+
+```js
+import { fonts } from 'inkmark';
+const f = fonts.find((x) => x.name === 'Rock Salt');
+createPlayer(el, scene, { style: { font: { family: f.family, size: f.size, weight: f.weight } } });
+```
 
 ## Dark scheme
 

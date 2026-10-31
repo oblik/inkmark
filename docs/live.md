@@ -53,7 +53,7 @@ Pass options as the third argument of `annotate`.
 
 | Option | Default | What it does |
 | --- | --- | --- |
-| `style` | `"marker"` | A style name (`"marker"`, `"sketch"`) or a partial style. A partial style can use `extends`. |
+| `style` | `"marker"` | A built-in style name (for example `"marker"`, `"chalk"`, `"modern"`) or a partial style. A partial style can use `extends`. |
 | `styles` | none | Your own styles by name. |
 | `scheme` | `"auto"` | `"light"`, `"dark"` or `"auto"`. See [Light and dark](#light-and-dark). |
 | `overlay` | off | `true` or `{ opacity, color }`. Dims the page except around the element while the mark is shown. |

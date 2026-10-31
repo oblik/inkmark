@@ -1,0 +1,9 @@
+{
+  "extends": "marker",
+  "name": "highlighter",
+  "pen": "freehand",
+  "colors": { "ink": "#F0328C", "accent": "#1E9BFF", "highlight": "#FFEA00" },
+  "dark": { "colors": { "ink": "#FF5CAA", "accent": "#4DB5FF", "highlight": "#FFE500" } },
+  "stroke": { "width": 12, "roughness": 0.5, "bowing": 0.5, "thinning": 0, "opacity": 0.6 },
+  "font": { "family": "\"Caveat Brush\", \"Caveat Variable\", Caveat, cursive", "size": 40, "weight": 400 }
+}

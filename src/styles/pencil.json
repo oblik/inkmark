@@ -1,0 +1,9 @@
+{
+  "extends": "marker",
+  "name": "pencil",
+  "pen": "rough",
+  "colors": { "ink": "#45454D", "accent": "#C92A2A", "highlight": "#FFE58A" },
+  "dark": { "colors": { "ink": "#D4D4DA", "accent": "#FF8787", "highlight": "#FFD43B" } },
+  "stroke": { "width": 1.8, "roughness": 2.2, "bowing": 1.4, "thinning": 0, "opacity": 0.9, "texture": "pencil" },
+  "font": { "family": "\"Shadows Into Light\", cursive", "size": 38, "weight": 400 }
+}

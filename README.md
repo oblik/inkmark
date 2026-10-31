@@ -122,7 +122,24 @@ Use the most exact source. A selector or an anchor is exact. A box or a point is
 
 ## Styles
 
-Two styles are built in. `marker` is a thick marker pen. `sketch` is a thin sketchy pen. Marks name color tokens such as `ink` and `accent`. They never use hex values.
+Ten styles are built in. Set `"style": "chalk"` in a scene, or `style: 'chalk'` in code.
+
+| Style | Look |
+| --- | --- |
+| `marker` | Thick red felt marker. The default. |
+| `sketch` | Thin, sketchy pen. |
+| `highlighter` | Wide, see-through neon strokes. |
+| `pencil` | Thin gray pencil with grain. |
+| `pen` | Fine blue ballpoint. |
+| `chalk` | Grainy chalk. White on dark pages. |
+| `whiteboard` | Blue and red dry-erase marker. |
+| `modern` | Clean, even lines and a sans-serif font. |
+| `blueprint` | Neat blue technical lines. |
+| `comic` | Bold black ink and comic capitals. |
+
+Each style has its own font. Install and import it on your page, for example `import '@fontsource/cabin-sketch/700.css'` for `chalk`. The `fonts` export lists 19 free handwritten fonts. See [docs/styles.md](docs/styles.md#fonts).
+
+Marks name color tokens such as `ink` and `accent`. They never use hex values.
 
 To use your own colors and font, extend a built-in style and change only what you need. See [docs/styles.md](docs/styles.md) and [examples/brand.json](examples/brand.json).
 

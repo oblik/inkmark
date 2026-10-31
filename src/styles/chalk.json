@@ -1,0 +1,9 @@
+{
+  "extends": "marker",
+  "name": "chalk",
+  "pen": "rough",
+  "colors": { "ink": "#1864AB", "accent": "#D6336C", "highlight": "#FFE066" },
+  "dark": { "colors": { "ink": "#F8F9FA", "accent": "#FFB3CF", "highlight": "#FFF0A8" } },
+  "stroke": { "width": 4, "roughness": 2, "bowing": 1, "thinning": 0, "texture": "chalk" },
+  "font": { "family": "\"Cabin Sketch\", cursive", "size": 34, "weight": 700 }
+}

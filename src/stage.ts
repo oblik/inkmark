@@ -103,10 +103,38 @@ export function elementBox(el: Element): Box {
 
 export interface MarkNodes {
   group: SVGGElement;
+  /** The highlight band path, if the mark has one. */
+  band?: SVGPathElement;
   /** Sequential draw-on segments. `targets` are drawable proxies. */
   segments: { targets: unknown[]; weight: number }[];
   /** Label characters, in order. */
   chars: SVGTSpanElement[];
+}
+
+// Grain: noise shakes the edges a little and punches small holes in the ink.
+// Chalk has big, many holes. Pencil has fine, few holes.
+const GRAIN = {
+  chalk: { freq: 0.75, shake: 2.6, alpha: '4.2 0 0 0 -1.35' },
+  pencil: { freq: 1.6, shake: 1, alpha: '3.4 0 0 0 -0.75' },
+};
+
+/** Adds a grain filter for one mark to `defs`. Its region is the mark bounds plus room. */
+function grainFilter(defs: SVGElement, id: string, kind: keyof typeof GRAIN, geom: MarkGeometry): string {
+  const g = GRAIN[kind];
+  const [x, y, w, h] = geom.bounds.box;
+  const pad = geom.width * 2 + (geom.text ? geom.text.fontSize * 0.5 : 0) + 24;
+  const f = svgEl('filter', {
+    id, filterUnits: 'userSpaceOnUse', 'color-interpolation-filters': 'sRGB',
+    x: Math.floor(x - pad), y: Math.floor(y - pad), width: Math.ceil(w + pad * 2), height: Math.ceil(h + pad * 2),
+  });
+  f.append(
+    svgEl('feTurbulence', { type: 'fractalNoise', baseFrequency: g.freq, numOctaves: 2, seed: 7, result: 'noise' }),
+    svgEl('feDisplacementMap', { in: 'SourceGraphic', in2: 'noise', scale: g.shake, xChannelSelector: 'R', yChannelSelector: 'G', result: 'shaken' }),
+    svgEl('feColorMatrix', { in: 'noise', type: 'matrix', values: `0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  ${g.alpha}`, result: 'grain' }),
+    svgEl('feComposite', { in: 'shaken', in2: 'grain', operator: 'in' }),
+  );
+  defs.appendChild(f);
+  return id;
 }
 
 export function addMarkNodes(
@@ -119,13 +147,21 @@ id: string, geom: MarkGeometry, parts: PenPart[], color: string, style: Style, u
   (geom.layer === 'highlight' ? layers.highlight : layers.marks).appendChild(group);
   const nodes: MarkNodes = { group, segments: [], chars: [] };
   const draw = (el: SVGElement) => createDrawable(el as unknown as SVGGeometryElement)[0];
+  // `group` opacity is animated (fades). Texture and stroke opacity go on inner groups.
+  const texture = style.stroke.texture;
+  const body = texture === 'chalk' || texture === 'pencil'
+    ? group.appendChild(svgEl('g', { filter: `url(#${grainFilter(layers.defs, `${uid}-${id}-grain`, texture, geom)})` }))
+    : group;
+  const opacity = style.stroke.opacity ?? 1;
+  const ink = opacity < 1 && parts.length ? body.appendChild(svgEl('g', { opacity })) : body;
 
   if (geom.band) {
     const p = svgEl('path', {
       d: geom.band.d, fill: 'none', stroke: color, 'stroke-width': geom.band.width,
       'stroke-linecap': 'butt', opacity: dark ? geom.band.opacity * 0.9 : geom.band.opacity,
     });
-    group.appendChild(p);
+    body.appendChild(p);
+    nodes.band = p as SVGPathElement;
     nodes.segments.push({ targets: [draw(p)], weight: 1 });
   }
   parts.forEach((part, i) => {
@@ -135,7 +171,7 @@ id: string, geom: MarkGeometry, parts: PenPart[], color: string, style: Style, u
           d, fill: 'none', stroke: color, 'stroke-width': geom.width,
           'stroke-linecap': 'round', 'stroke-linejoin': 'round',
         });
-        group.appendChild(p);
+        ink.appendChild(p);
         return draw(p);
       });
       nodes.segments.push({ targets, weight: part.weight });
@@ -148,7 +184,7 @@ id: string, geom: MarkGeometry, parts: PenPart[], color: string, style: Style, u
       });
       mask.appendChild(c);
       layers.defs.appendChild(mask);
-      group.appendChild(svgEl('path', { d: part.outline, fill: color, mask: `url(#${maskId})` }));
+      ink.appendChild(svgEl('path', { d: part.outline, fill: color, mask: `url(#${maskId})` }));
       nodes.segments.push({ targets: [draw(c)], weight: part.weight });
     }
   });
@@ -174,7 +210,7 @@ id: string, geom: MarkGeometry, parts: PenPart[], color: string, style: Style, u
         text.appendChild(ts);
         nodes.chars.push(ts);
       }
-      group.appendChild(text);
+      body.appendChild(text);
     }
     // Hidden until the timeline starts the label. Hidden also means no screen reader and no selection.
     group.style.visibility = 'hidden';

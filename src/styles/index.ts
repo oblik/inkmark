@@ -1,10 +1,26 @@
 import type { Style, StyleInput } from '../types.ts';
 import marker from './marker.json' with { type: 'json' };
 import sketch from './sketch.json' with { type: 'json' };
+import highlighter from './highlighter.json' with { type: 'json' };
+import pencil from './pencil.json' with { type: 'json' };
+import pen from './pen.json' with { type: 'json' };
+import chalk from './chalk.json' with { type: 'json' };
+import whiteboard from './whiteboard.json' with { type: 'json' };
+import modern from './modern.json' with { type: 'json' };
+import blueprint from './blueprint.json' with { type: 'json' };
+import comic from './comic.json' with { type: 'json' };
 
 export const builtInStyles: Record<string, StyleInput> = {
   marker: marker as StyleInput,
   sketch: sketch as StyleInput,
+  highlighter: highlighter as StyleInput,
+  pencil: pencil as StyleInput,
+  pen: pen as StyleInput,
+  chalk: chalk as StyleInput,
+  whiteboard: whiteboard as StyleInput,
+  modern: modern as StyleInput,
+  blueprint: blueprint as StyleInput,
+  comic: comic as StyleInput,
 };
 
 export const DEFAULT_STYLE = 'marker';
