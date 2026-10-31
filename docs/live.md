@@ -69,7 +69,7 @@ g.remove();       // removes the group and all its marks
 ```
 
 1. A group shows its marks in order, with `gap` seconds between them. The default gap comes from the style.
-2. With `overlay: true` the page is dimmed. The hole follows the mark that is drawing now.
+2. With `overlay: true` the page is dimmed. The hole follows the mark that is drawing now. When the last mark is done, the dim fades out after the style hold. The marks stay.
 3. A label in a spotlight gets a halo, so it stays easy to read.
 4. Do not set `overlay` on the single marks of a group. Set it on the group.
 

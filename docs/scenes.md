@@ -60,6 +60,7 @@ The overlay dims the background and leaves rounded holes around the targets of t
 5. Order of precedence: the `overlay` option of `mountScene` or `createPlayer`, then the step, then the scene. The option `overlay: false` turns the overlay off everywhere.
 6. A label on a step with the overlay gets a halo in the `paper` color, so it stays readable on the dim layer.
 7. A step with no hole targets (only labels or scribbles) keeps the dim layer and holes of the step before, unless it sets `overlay: false`.
+8. The overlay ends with the scene. After the hold of the last step it fades out, and the marks stay. The player stops there, and the MP4 ends there. `drawScene` and the step PNGs keep it.
 8. Size and softness come from the style `overlay` tokens. See [docs/styles.md](styles.md).
 
 ## Color scheme

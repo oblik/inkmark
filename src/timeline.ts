@@ -88,6 +88,11 @@ export function buildTimeline(planned: PlannedStep[], style: Style): BuiltTimeli
     for (const m of marks) earlier.push(m.nodes.group);
     start = end;
   }
+  // The spotlight ends with the scene: after the last hold, the dim fades out and the marks stay.
+  if (prevDim) {
+    tl.add(prevDim.el, { opacity: [prevDim.opacity, 0], duration: prevDim.fadeMs, ease: 'linear' }, start);
+    start += prevDim.fadeMs;
+  }
   // Labels are hidden (also from screen readers) until their start time. Seeking back hides them again.
   const showLabels = () => {
     const t = tl.currentTime;

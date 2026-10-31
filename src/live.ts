@@ -731,6 +731,14 @@ export function annotateGroup(list: Annotation[], options: GroupOptions = {}): A
           if (i < members.length - 1 && token === run && !reduced()) await wait(gap());
         }
         current = undefined;
+        // The spotlight ends with the group: after the hold, the dim fades out and the marks stay.
+        if (dim && token === run) {
+          if (!reduced()) await wait(first.firstStyle.timing.hold * 1000);
+          if (token !== run) return;
+          holeOf = undefined;
+          if (reduced()) { dim.fading?.stop(); dim.node.el.style.opacity = '0'; }
+          else await fadeDim(dim, 0, dim.node.fadeMs);
+        }
       })();
       return running;
     },

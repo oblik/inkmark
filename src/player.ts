@@ -65,7 +65,8 @@ export async function createPlayer(container: HTMLElement, scene: Scene, options
       atEnd = false;
       if (t >= duration - 1) {
         if (options.loop) { handle.seek(0); idx = 0; emit(); timeline.play(); }
-        else { stop(); setPos(n - 1, true); }
+        // Stay at the very end, after the spotlight fade, not at the last drawEnd.
+        else { stop(); handle.seek(duration); idx = n - 1; atEnd = true; emit(); }
       }
     } else if (t >= stopAt) {
       stop();
