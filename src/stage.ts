@@ -46,18 +46,44 @@ function painted(el: Element): boolean {
   );
 }
 
+type Edges = [left: number, top: number, right: number, bottom: number];
+
+/** The area that is not cut off by `overflow` on `from` and its parents, up to and with `stop`. */
+function clipOf(from: Element, stop: Element, cache: Map<Element, Edges>): Edges {
+  const hit = cache.get(from);
+  if (hit) return hit;
+  const parent = from === stop ? null : from.parentElement;
+  let [x0, y0, x1, y1]: Edges = parent ? clipOf(parent, stop, cache) : [-Infinity, -Infinity, Infinity, Infinity];
+  const c = from.ownerDocument.defaultView!.getComputedStyle(from);
+  if (c.overflowX !== 'visible' || c.overflowY !== 'visible') {
+    const r = from.getBoundingClientRect();
+    if (c.overflowX !== 'visible') { x0 = Math.max(x0, r.left); x1 = Math.min(x1, r.right); }
+    if (c.overflowY !== 'visible') { y0 = Math.max(y0, r.top); y1 = Math.min(y1, r.bottom); }
+  }
+  const edges: Edges = [x0, y0, x1, y1];
+  cache.set(from, edges);
+  return edges;
+}
+
 // Box of the text inside an element. null when the element should keep its own box.
 function textBox(el: Element): Box | null {
   const doc = el.ownerDocument;
   if (el.matches(REPLACED) || el.querySelector(REPLACED) || painted(el)) return null;
   for (const d of el.querySelectorAll('*')) if (painted(d)) return null;
   const rects: Box[] = [];
+  const clips = new Map<Element, Edges>();
   const walker = doc.createTreeWalker(el, NodeFilter.SHOW_TEXT);
   for (let n = walker.nextNode(); n; n = walker.nextNode()) {
     if (!n.textContent?.trim()) continue;
+    const [cx0, cy0, cx1, cy1] = clipOf(n.parentElement!, el, clips);
     const range = doc.createRange();
     range.selectNodeContents(n);
-    for (const r of range.getClientRects()) if (r.width > 1 && r.height > 1) rects.push([r.left, r.top, r.width, r.height]);
+    for (const r of range.getClientRects()) {
+      // Only the visible part counts: rolling counters and cut-off text hide the rest.
+      const x0 = Math.max(r.left, cx0), y0 = Math.max(r.top, cy0);
+      const x1 = Math.min(r.right, cx1), y1 = Math.min(r.bottom, cy1);
+      if (x1 - x0 > 1 && y1 - y0 > 1) rects.push([x0, y0, x1 - x0, y1 - y0]);
+    }
   }
   if (!rects.length) return null;
   const x0 = Math.min(...rects.map((r) => r[0]));
