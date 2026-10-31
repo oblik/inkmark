@@ -9,7 +9,7 @@ import type { GeometryContext, Region } from './geometry/types.ts';
 import { resolveStyle, styleForScheme } from './styles/index.ts';
 import { markSeed } from './seed.ts';
 import { elementBox, addMarkNodes, type MarkNodes } from './stage.ts';
-import { renderStrokes } from './geometry/pen.ts';
+import { loadPen, renderStrokes } from './geometry/pen.ts';
 import { buildGeometry } from './geometry/index.ts';
 import { createDim, pickOverlay, setHoles, type OverlayNode } from './overlay.ts';
 import { buildTimeline, type PlannedMark } from './timeline.ts';
@@ -614,7 +614,7 @@ export function annotate(target: LiveTarget, mark: LiveMark, options: AnnotateOp
       if (shown) return showPromise;
       shown = true;
       showPromise = (async () => {
-        await ensureFont();
+        await Promise.all([ensureFont(), loadPen(baseStyle)]);
         if (removed || !shown) return;
         const l = ensureLayer();
         if (!items.has(impl)) {

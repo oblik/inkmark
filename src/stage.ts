@@ -1,4 +1,4 @@
-import { svg } from 'animejs';
+import { createDrawable } from 'animejs/svg';
 import type { Box, Point, Scene, Style } from './types.ts';
 import type { MarkGeometry } from './geometry/types.ts';
 import type { PenPart } from './geometry/pen.ts';
@@ -118,7 +118,7 @@ id: string, geom: MarkGeometry, parts: PenPart[], color: string, style: Style, u
   const group = svgEl('g', { 'data-mark': id }) as SVGGElement;
   (geom.layer === 'highlight' ? layers.highlight : layers.marks).appendChild(group);
   const nodes: MarkNodes = { group, segments: [], chars: [] };
-  const draw = (el: SVGElement) => svg.createDrawable(el as unknown as SVGGeometryElement)[0];
+  const draw = (el: SVGElement) => createDrawable(el as unknown as SVGGeometryElement)[0];
 
   if (geom.band) {
     const p = svgEl('path', {

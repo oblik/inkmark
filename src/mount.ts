@@ -4,7 +4,7 @@ import { resolveStyle, styleForScheme } from './styles/index.ts';
 import { markSeed } from './seed.ts';
 import { createStage, resolveUrl } from './stage.ts';
 import { createResolver, toFramePoint, toFrameBox, type MarkRecord } from './targets.ts';
-import { renderStrokes } from './geometry/pen.ts';
+import { loadPen, renderStrokes } from './geometry/pen.ts';
 import { buildGeometry } from './geometry/index.ts';
 import { createDim, pickOverlay } from './overlay.ts';
 import { buildTimeline, type PlannedStep } from './timeline.ts';
@@ -76,6 +76,7 @@ export async function mountScene(container: HTMLElement, scene: Scene, options: 
   container.classList.add('ik-player');
   container.dataset.ikScheme = scheme;
   injectFont(style, options.baseUrl);
+  const pen = loadPen(style);
 
   const labels = scene.steps.flatMap((s) => s.marks).filter((m) => m.type === 'label');
   const fontSpec = `${style.font.weight ?? 400} ${style.font.size}px ${style.font.family}`;
@@ -98,6 +99,7 @@ export async function mountScene(container: HTMLElement, scene: Scene, options: 
     anchors = ((await res.json()) as { anchors: Record<string, Point | Box> }).anchors ?? {};
   } else if (a) anchors = a;
 
+  await pen;
   const records = new Map<string, MarkRecord>();
   const region = createResolver({
     map: stage.map,

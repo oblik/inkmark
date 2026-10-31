@@ -1,4 +1,4 @@
-import rough from 'roughjs';
+import type { RoughGenerator } from 'roughjs/bin/generator';
 import { getStroke } from 'perfect-freehand';
 import type { Point, Style } from '../types.ts';
 import type { Skeleton } from './types.ts';
@@ -12,7 +12,16 @@ export type PenPart =
   /** Marker pen: a filled outline. A mask with the centerline reveals it. */
   | { kind: 'fill'; outline: string; center: string; maskWidth: number; weight: number };
 
-const generator = rough.generator();
+// The rough pen code loads only when a style uses it. Most styles use the freehand pen.
+let generator: RoughGenerator | undefined;
+let loading: Promise<void> | undefined;
+
+/** Loads the pen code a style needs. Call it before `renderStrokes`. */
+export function loadPen(style: Style): Promise<void> {
+  if (style.pen !== 'rough' || generator) return Promise.resolve();
+  loading ??= import('roughjs').then((m) => { generator = m.default.generator(); });
+  return loading;
+}
 const r1 = (n: number) => Math.round(n * 10) / 10;
 
 export function renderStrokes(strokes: Skeleton[], style: Style, seed: number, width: number): PenPart[] {
@@ -24,6 +33,7 @@ export function renderStrokes(strokes: Skeleton[], style: Style, seed: number, w
 }
 
 function roughPart(s: Skeleton, style: Style, seed: number, width: number, weight: number): PenPart {
+  if (!generator) throw new Error('Inkmark: the rough pen is not loaded. Call loadPen(style) first.');
   const o = {
     seed: seed || 1,
     roughness: style.stroke.roughness,
