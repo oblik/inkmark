@@ -2,6 +2,7 @@ import type { Box, OverlayInput, Point, Scene, Style, StyleInput, StepTime } fro
 import type { Timeline } from 'animejs';
 import { resolveStyle, styleForScheme } from './styles/index.ts';
 import { markSeed } from './seed.ts';
+import { sceneSteps } from './scene.ts';
 import { createStage, resolveUrl } from './stage.ts';
 import { createResolver, toFramePoint, toFrameBox, type MarkRecord } from './targets.ts';
 import { loadPen, renderStrokes } from './geometry/pen.ts';
@@ -78,7 +79,8 @@ export async function mountScene(container: HTMLElement, scene: Scene, options: 
   injectFont(style, options.baseUrl);
   const pen = loadPen(style);
 
-  const labels = scene.steps.flatMap((s) => s.marks).filter((m) => m.type === 'label');
+  const sceneStepList = sceneSteps(scene);
+  const labels = sceneStepList.flatMap((s) => s.marks).filter((m) => m.type === 'label');
   const fontSpec = `${style.font.weight ?? 400} ${style.font.size}px ${style.font.family}`;
   if (labels.length) {
     const sample = labels.map((m) => (m.type === 'label' ? m.text : '')).join('');
@@ -126,7 +128,7 @@ export async function mountScene(container: HTMLElement, scene: Scene, options: 
   const planned: PlannedStep[] = [];
   let prevDim: ReturnType<typeof createDim> | undefined;
   let prevHoles: Box[] = [];
-  for (const step of scene.steps) {
+  for (const step of sceneStepList) {
     const marks: PlannedStep['marks'] = [];
     const spec = pickOverlay(options.overlay, step.overlay, scene.overlay, style, style.colors);
     // A label on the dim layer gets a halo in the paper color, so it stays readable.

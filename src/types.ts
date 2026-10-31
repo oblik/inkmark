@@ -103,6 +103,7 @@ export interface Step {
   marks: Mark[];
 }
 
+/** A scene has `steps` (step by step), or only `marks` (one step, for a static picture). */
 export interface Scene {
   inkmark: '1.0';
   id: string;
@@ -115,7 +116,9 @@ export interface Scene {
   overlay?: boolean | OverlayInput;
   /** Fixed color scheme, for backgrounds that never change (images). */
   scheme?: 'light' | 'dark';
-  steps: Step[];
+  steps?: Step[];
+  /** Short form of one step. Use instead of `steps`. */
+  marks?: Mark[];
 }
 
 // Styles. A style is a set of tokens. A project makes its own style by

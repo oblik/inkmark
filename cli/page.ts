@@ -128,7 +128,7 @@ export function preparePage(scenePath: string): { loaded: LoadedScene; data: Pag
   const loaded = loadScene(scenePath);
   const { scene, dir } = loaded;
   if (loaded.problems.length) throw new Error(loaded.problems.map((p) => p.message).join(' '));
-  if (!scene || !scene.background || !Array.isArray(scene.steps)) throw new Error(`"${scenePath}" is not a scene. Run "inkmark validate" first.`);
+  if (!scene || !scene.background || !(Array.isArray(scene.steps) || Array.isArray(scene.marks))) throw new Error(`"${scenePath}" is not a scene. Run "inkmark validate" first.`);
   const bundle = loadBundle();
   const copy = structuredClone(scene);
   const style = resolveStyle(copy.style, loaded.styles);

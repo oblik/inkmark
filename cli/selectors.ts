@@ -11,7 +11,9 @@ interface Found {
 
 function collect(scene: unknown): Found[] {
   const out: Found[] = [];
-  const steps = (scene as { steps?: unknown })?.steps;
+  const sc = scene as { steps?: unknown; marks?: unknown } | null;
+  const short = !Array.isArray(sc?.steps) && Array.isArray(sc?.marks);
+  const steps = short ? [{ marks: sc!.marks }] : sc?.steps;
   if (!Array.isArray(steps)) return out;
   const visit = (path: string, t: unknown) => {
     if (t && typeof t === 'object' && typeof (t as { selector?: unknown }).selector === 'string') {
@@ -22,7 +24,7 @@ function collect(scene: unknown): Found[] {
     const marks = (step as { marks?: unknown })?.marks;
     if (!Array.isArray(marks)) return;
     marks.forEach((m, mi) => {
-      const p = `steps[${si}].marks[${mi}]`;
+      const p = short ? `marks[${mi}]` : `steps[${si}].marks[${mi}]`;
       for (const k of ['target', 'from', 'to', 'at']) visit(`${p}.${k}`, (m as Record<string, unknown>)?.[k]);
     });
   });

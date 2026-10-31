@@ -17,6 +17,23 @@ The script-tag build has the same API as `Inkmark.annotate`. Marks follow their 
 
 A scene can also play with no controls: `createPlayer(el, scene, { controls: false, autoplay: true })`.
 
+## A static picture
+
+For one picture with no steps, write `marks` instead of `steps`. `drawScene` draws every mark at once, like a screenshot. It has no animation and no controls.
+
+```js
+import { drawScene } from 'inkmark';
+
+await drawScene(document.querySelector('#box'), {
+  inkmark: '1.0',
+  id: 'pricing',
+  background: { type: 'image', src: 'pricing.png', width: 1280, height: 800 },
+  marks: [{ id: 'c1', type: 'circle', target: { box: [100, 120, 300, 80] } }],
+});
+```
+
+`drawScene` also works with a scene that has steps. It shows the last step, finished. The CLI `preview` command writes the same picture as a PNG. In live mode, use `annotate(el, mark, { animate: false })`.
+
 ## Example scene
 
 ```json

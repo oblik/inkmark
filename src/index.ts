@@ -1,5 +1,6 @@
 export { mountScene } from './mount.ts';
 export type { MountOptions, SceneHandle } from './mount.ts';
+export { drawScene } from './draw.ts';
 export { createPlayer } from './player.ts';
 export type { Player, PlayerOptions } from './player.ts';
 export { resolveStyle } from './styles/index.ts';

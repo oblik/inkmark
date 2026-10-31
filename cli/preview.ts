@@ -26,7 +26,9 @@ export async function previewCommand(args: string[]): Promise<number> {
   await withCapture(data, async (page, info) => {
     for (let i = 0; i < info.steps.length; i++) {
       await page.evaluate(`window.__mg.seekStep(${i}, 'drawEnd')`);
-      const file = join(dir, `${loaded.scene.id}-${info.steps[i].id}.png`);
+      // A scene with only `marks` has one step: the file is named after the scene.
+      const name = loaded.scene.steps ? `${loaded.scene.id}-${info.steps[i].id}` : loaded.scene.id;
+      const file = join(dir, `${name}.png`);
       await page.screenshot({ path: file, type: 'png', clip: { x: 0, y: 0, width: data.width, height: data.height } });
       console.log(rel(file));
     }

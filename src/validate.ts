@@ -1,5 +1,6 @@
 import type { Box, Issue, Point, Style, StyleInput, ValidationResult } from './types.ts';
 import { builtInStyles, resolveStyle } from './styles/index.ts';
+import { MARKS_STEP } from './scene.ts';
 
 export interface ValidateOptions {
   styles?: Record<string, StyleInput>;
@@ -118,11 +119,20 @@ export function validate(scene: unknown, options: ValidateOptions = {}): Validat
   };
   checkOverlay('overlay', scene.overlay);
 
-  // Steps
-  if (!Array.isArray(scene.steps) || scene.steps.length === 0) {
-    err('steps', 'Field "steps" must be a list with at least one step. Add a step with marks.');
+  // Steps. A scene with only `marks` is one step. Its issue paths say `marks[i]`.
+  const short = scene.steps === undefined && scene.marks !== undefined;
+  if (scene.steps !== undefined && scene.marks !== undefined) {
+    err('marks', 'Use "steps" or "marks", not both. Move the marks into a step.');
+  }
+  if (short && (!Array.isArray(scene.marks) || scene.marks.length === 0)) {
+    err('marks', 'Field "marks" must be a list with at least one mark. Add a mark.');
     return { ok: errors.length === 0, errors, warnings };
   }
+  if (!short && (!Array.isArray(scene.steps) || scene.steps.length === 0)) {
+    err('steps', 'Field "steps" must be a list with at least one step. Add a step with marks, or use "marks" for one step.');
+    return { ok: errors.length === 0, errors, warnings };
+  }
+  const steps: unknown[] = short ? [{ id: MARKS_STEP, marks: scene.marks }] : (scene.steps as unknown[]);
 
   const hasAnchorMap = anchors !== undefined;
   const stepIds = new Set<string>();
@@ -204,7 +214,7 @@ export function validate(scene: unknown, options: ValidateOptions = {}): Validat
     return style.defaults.stroke;
   };
 
-  (scene.steps as unknown[]).forEach((step, si) => {
+  steps.forEach((step, si) => {
     const sp = `steps[${si}]`;
     if (!isObj(step)) {
       err(sp, 'Step must be an object { "id", "marks" }. Fix the value.');
@@ -224,7 +234,7 @@ export function validate(scene: unknown, options: ValidateOptions = {}): Validat
       err(`${sp}.marks`, 'Step "marks" must be a list with at least one mark. Add a mark.');
       return;
     }
-    if (step.marks.length > 3) warn(`${sp}.marks`, `Step has ${step.marks.length} marks. Use 3 or fewer so a viewer can follow. Split it into more steps.`);
+    if (!short && step.marks.length > 3) warn(`${sp}.marks`, `Step has ${step.marks.length} marks. Use 3 or fewer so a viewer can follow. Split it into more steps.`);
 
     const stepMarkIds = new Set<string>();
     step.marks.forEach((mark: unknown, mi: number) => {
@@ -310,8 +320,11 @@ export function validate(scene: unknown, options: ValidateOptions = {}): Validat
   });
 
   if (colorsUsed.size > 2) {
-    warn('steps', `The scene uses ${colorsUsed.size} annotation colors (${[...colorsUsed].join(', ')}). Use 2 or fewer for a calm look.`);
+    warn(short ? 'marks' : 'steps', `The scene uses ${colorsUsed.size} annotation colors (${[...colorsUsed].join(', ')}). Use 2 or fewer for a calm look.`);
   }
 
+  if (short) {
+    for (const i of [...errors, ...warnings]) i.path = i.path.replace(/^steps\[0\]\.marks/, 'marks');
+  }
   return { ok: errors.length === 0, errors, warnings };
 }

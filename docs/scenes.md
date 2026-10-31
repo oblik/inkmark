@@ -1,6 +1,6 @@
 # Scene reference
 
-A scene is one JSON file. It names a background and lists steps. Each step has marks. Format version: `1.0`.
+A scene is one JSON file. It names a background and lists steps. Each step has marks. For one static picture, list `marks` and no steps. Format version: `1.0`.
 
 Units: all sizes and coordinates are pixels in the background's own space. All times are seconds.
 
@@ -15,7 +15,8 @@ Units: all sizes and coordinates are pixels in the background's own space. All t
 | `style` | text or object | `"marker"` | A built-in name, a path to a style file, a name from `createPlayer` options, or an inline style. |
 | `overlay` | boolean or object | off | Spotlight for every step. See [Overlay](#overlay). |
 | `scheme` | `light` or `dark` | follows the page | Fixes the color scheme. Use it for image backgrounds that never change. |
-| `steps` | list | none | Required. At least one step. |
+| `steps` | list | none | At least one step. Give `steps` or `marks`. |
+| `marks` | list | none | Short form of one step, for a static picture. Use instead of `steps`. |
 
 ## Background
 
@@ -147,6 +148,14 @@ Common visual mistakes:
 6. A label draws its letters one by one. Its default time is `labelPerChar` times the text length. It is never shorter than half the style label duration.
 7. `clear: true` fades out all earlier marks in 0.3 seconds. Then the step starts.
 8. The scene length is the sum of all steps, with their holds.
+
+## Static picture
+
+A scene with `marks` and no `steps` is one step. Its step id is `marks`, and validation paths read `marks[0]`. The validator does not limit the number of marks in it.
+
+`drawScene(container, scene, options)` draws a scene in its final state: every mark is drawn, with no animation and no controls. It takes the same options as `mountScene` and returns the same handle. For a scene with steps, it shows the last step, finished. A step with `clear` still hides the marks before it.
+
+`inkmark preview` writes a static scene as one PNG, named `<scene-id>.png`.
 
 ## Player behavior
 
