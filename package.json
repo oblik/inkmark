@@ -5,10 +5,7 @@
   "description": "Hand-drawn annotations over UI, text, photos and charts, played step by step. One JSON scene gives a web player, PNGs and an MP4.",
   "license": "MIT",
   "type": "module",
-  "sideEffects": [
-    "**/*.css",
-    "./demo/**"
-  ],
+  "sideEffects": false,
   "engines": {
     "node": ">=22.18"
   },
