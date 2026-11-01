@@ -7,7 +7,7 @@ Inkmark draws hand-drawn marks (circles, arrows, labels) over an image, a web pa
 You can mark elements on any live page. You need no scene and no background.
 
 ```js
-import { annotate } from 'inkmark';
+import { annotate } from 'inkmarkjs';
 
 await annotate('#price', 'circle').show();
 await annotate('#plan', { type: 'label', text: 'Best value', side: 'right' }).show();
@@ -22,7 +22,7 @@ A scene can also play with no controls: `createPlayer(el, scene, { controls: fal
 For one picture with no steps, write `marks` instead of `steps`. `drawScene` draws every mark at once, like a screenshot. It has no animation and no controls.
 
 ```js
-import { drawScene } from 'inkmark';
+import { drawScene } from 'inkmarkjs';
 
 await drawScene(document.querySelector('#box'), {
   inkmark: '1.0',
@@ -66,7 +66,7 @@ npm run dev     # test pages: /sandbox.html and /sandbox-live.html
 ## Quick start in the browser
 
 ```js
-import { createPlayer } from 'inkmark';
+import { createPlayer } from 'inkmarkjs';
 import '@fontsource/permanent-marker'; // the default label font
 
 const scene = await (await fetch('pricing.json')).json();

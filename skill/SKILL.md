@@ -14,7 +14,7 @@ Run commands with `node cli/index.ts <command>`.
 Use live mode when the user wants marks on their own running page, not a video or PNG. Use a scene when the output is a PNG, an MP4 or a step-by-step player.
 
 ```js
-import { annotate, annotateGroup } from 'inkmark'; // script tag: Inkmark.annotate
+import { annotate, annotateGroup } from 'inkmarkjs'; // script tag: Inkmark.annotate
 const a = annotate('#price', 'circle');                          // or { type, ...options }
 const b = annotate('#plan', { type: 'label', text: 'Best value', side: 'right' });
 await a.show(); await a.hide(); a.remove();

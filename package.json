@@ -1,5 +1,5 @@
 {
-  "name": "inkmark",
+  "name": "inkmarkjs",
   "version": "0.1.0",
   "private": true,
   "description": "Hand-drawn annotations over UI, text, photos and charts, played step by step. One JSON scene gives a web player, PNGs and an MP4.",
