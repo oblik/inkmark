@@ -60,7 +60,7 @@ The package is not published yet. Use it from a local clone.
 ```sh
 npm install
 npm run build   # builds the library into dist/
-npm run dev     # starts the demo
+npm run dev     # test pages: /sandbox.html and /sandbox-live.html
 ```
 
 ## Quick start in the browser
