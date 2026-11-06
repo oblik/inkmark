@@ -243,7 +243,20 @@ export interface StageOptions {
 }
 
 const UNSAFE_TAGS = 'script,iframe,embed,object,frame,frameset,meta,link,base';
-const UNSAFE_URL = /^\s*(javascript|vbscript|data\s*:\s*text\/html)/i;
+const SAFE_SCHEMES = new Set(['http:', 'https:', 'mailto:', 'blob:']);
+
+// Allows only known-safe links. Browsers ignore spaces, tabs and control characters in a URL,
+// so remove them before the check ("jav&#x09;ascript:" is still javascript:).
+function safeUrl(value: string): boolean {
+  const s = value.replace(/[\u0000- \u007f]/g, '');
+  if (!/^[a-z][a-z0-9+.-]*:/i.test(s)) return true; // relative link or #fragment
+  if (/^data:image\//i.test(s)) return true;
+  try {
+    return SAFE_SCHEMES.has(new URL(s).protocol);
+  } catch {
+    return false;
+  }
+}
 
 // Removes what can run code: script-like elements, `on*` handlers, javascript: links,
 // and animations that change a link or a handler.
@@ -258,7 +271,7 @@ function cleanSvg(root: DocumentFragment): void {
     }
     for (const { name, value } of [...el.attributes]) {
       const n = name.toLowerCase();
-      if (n.startsWith('on') || ((n.endsWith('href') || n === 'src' || n === 'action' || n === 'formaction') && UNSAFE_URL.test(value))) {
+      if (n.startsWith('on') || ((n.endsWith('href') || n === 'src' || n === 'action' || n === 'formaction') && !safeUrl(value))) {
         el.removeAttribute(name);
       }
     }
