@@ -12,6 +12,20 @@ const iife: InlineConfig = {
   },
 };
 
+// Third build: the CLI as plain JavaScript for Node. Node does not run .ts files inside node_modules.
+// Packages stay external; they come from the user's node_modules.
+const cli: InlineConfig = {
+  configFile: false,
+  logLevel: 'warn',
+  build: {
+    ssr: 'cli/index.ts',
+    outDir: 'dist',
+    emptyOutDir: false,
+    target: 'node22',
+    rolldownOptions: { output: { entryFileNames: 'cli.js', banner: '#!/usr/bin/env node' } },
+  },
+};
+
 export default defineConfig({
   build: {
     outDir: 'dist',
@@ -25,6 +39,7 @@ export default defineConfig({
       apply: 'build',
       async closeBundle() {
         await build(iife);
+        await build(cli);
       },
     },
   ],

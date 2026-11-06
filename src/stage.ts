@@ -242,6 +242,29 @@ export interface StageOptions {
   scheme: 'light' | 'dark';
 }
 
+const UNSAFE_TAGS = 'script,iframe,embed,object,frame,frameset,meta,link,base';
+const UNSAFE_URL = /^\s*(javascript|vbscript|data\s*:\s*text\/html)/i;
+
+// Removes what can run code: script-like elements, `on*` handlers, javascript: links,
+// and animations that change a link or a handler.
+function cleanSvg(root: DocumentFragment): void {
+  root.querySelectorAll(UNSAFE_TAGS).forEach((n) => n.remove());
+  for (const el of root.querySelectorAll('*')) {
+    const tag = el.localName.toLowerCase();
+    const animated = (el.getAttribute('attributeName') ?? '').toLowerCase();
+    if ((tag === 'set' || tag === 'animate') && (animated.startsWith('on') || animated.endsWith('href'))) {
+      el.remove();
+      continue;
+    }
+    for (const { name, value } of [...el.attributes]) {
+      const n = name.toLowerCase();
+      if (n.startsWith('on') || ((n.endsWith('href') || n === 'src' || n === 'action' || n === 'formaction') && UNSAFE_URL.test(value))) {
+        el.removeAttribute(name);
+      }
+    }
+  }
+}
+
 function waitFor(target: EventTarget, ok = 'load'): Promise<void> {
   return new Promise((res, rej) => {
     target.addEventListener(ok, () => res(), { once: true });
@@ -364,7 +387,11 @@ export async function createStage(container: HTMLElement, scene: Scene, opts: St
       if (!res.ok) throw new Error(`Could not load the svg background (${res.status}).`);
       markup = await res.text();
     }
-    bgBox.innerHTML = markup;
+    // Parse in an inert template, clean it, then insert. An svg file must not run code in the page.
+    const tpl = document.createElement('template');
+    tpl.innerHTML = markup;
+    cleanSvg(tpl.content);
+    bgBox.replaceChildren(tpl.content);
     const el = bgBox.querySelector('svg');
     if (!el) throw new Error('The svg background has no <svg> element.');
     if (!el.getAttribute('viewBox')) {

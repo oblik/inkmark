@@ -1,10 +1,18 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
-import { chromium } from 'playwright-core';
 import type { Browser, Page } from 'playwright-core';
 
 export type { Browser, Page };
+
+// playwright-core is an optional peer dependency: only the CLI needs it, not the browser library.
+async function loadChromium() {
+  try {
+    return (await import('playwright-core')).chromium;
+  } catch {
+    throw new Error('The inkmark CLI needs playwright-core. Install it with: npm install --save-dev playwright-core');
+  }
+}
 
 function cachedChromium(): string[] {
   const roots = [join(homedir(), 'Library', 'Caches', 'ms-playwright'), join(homedir(), '.cache', 'ms-playwright')];
@@ -31,6 +39,7 @@ function cachedChromium(): string[] {
 
 /** Starts headless Chromium. Tries the default build, then a cached build, then Chrome. */
 export async function launchBrowser(): Promise<Browser> {
+  const chromium = await loadChromium();
   const attempts: (() => Promise<Browser>)[] = [
     () => chromium.launch(),
     ...cachedChromium().map((executablePath) => () => chromium.launch({ executablePath })),

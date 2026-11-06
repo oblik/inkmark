@@ -34,6 +34,9 @@ export interface SceneHandle {
 let uidCounter = 0;
 const fontsDone = new Set<string>();
 
+// Escapes a value for a double-quoted CSS string, so a quote or a newline cannot end it.
+const cssString = (s: string) => s.replace(/["\\\n\r\f]/g, (c) => `\\${c.charCodeAt(0).toString(16)} `);
+
 function firstFamily(family: string): string {
   return family.split(',')[0].trim().replace(/^["']|["']$/g, '');
 }
@@ -48,7 +51,7 @@ export function injectFont(style: Style, baseUrl?: string) {
   fontsDone.add(key);
   const el = document.createElement('style');
   el.setAttribute('data-inkmark-font', family);
-  el.textContent = `@font-face{font-family:"${family}";src:url("${url}");font-weight:100 900;font-display:block}`;
+  el.textContent = `@font-face{font-family:"${cssString(family)}";src:url("${cssString(url)}");font-weight:100 900;font-display:block}`;
   document.head.appendChild(el);
 }
 

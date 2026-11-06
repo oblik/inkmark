@@ -1,26 +1,83 @@
 {
-  "name": "inkmarkjs",
+  "name": "@oblik/inkmark",
   "version": "0.1.0",
-  "private": true,
   "description": "Hand-drawn annotations over UI, text, photos and charts, played step by step. One JSON scene gives a web player, PNGs and an MP4.",
+  "keywords": [
+    "annotation",
+    "annotate",
+    "hand-drawn",
+    "sketch",
+    "scribble",
+    "doodle",
+    "arrow",
+    "highlight",
+    "underline",
+    "circle",
+    "rough",
+    "animation",
+    "svg",
+    "walkthrough",
+    "tutorial",
+    "whiteboard"
+  ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oblik/inkmark.git"
+  },
+  "homepage": "https://github.com/oblik/inkmark#readme",
+  "bugs": {
+    "url": "https://github.com/oblik/inkmark/issues"
+  },
   "type": "module",
   "sideEffects": false,
+  "main": "./dist/inkmark.js",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "default": "./dist/inkmark.js"
+    },
+    "./iife": "./dist/inkmark.iife.js",
+    "./package.json": "./package.json"
+  },
+  "unpkg": "./dist/inkmark.iife.js",
+  "jsdelivr": "./dist/inkmark.iife.js",
+  "bin": {
+    "inkmark": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "docs",
+    "skill"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
     "node": ">=22.18"
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build -c vite.lib.config.ts",
+    "build": "vite build -c vite.lib.config.ts && tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "test": "node --test \"test/**/*.test.ts\"",
-    "inkmark": "node cli/index.ts"
+    "inkmark": "node cli/index.ts",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build"
   },
   "dependencies": {
     "@fontsource/permanent-marker": "^5.3.0",
     "animejs": "^4.5.0",
     "perfect-freehand": "^1.2.3",
     "roughjs": "^4.6.6"
+  },
+  "peerDependencies": {
+    "playwright-core": ">=1.50.0"
+  },
+  "peerDependenciesMeta": {
+    "playwright-core": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@fontsource-variable/caveat": "^5.3.0",

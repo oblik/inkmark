@@ -91,7 +91,7 @@ These free fonts (SIL Open Font License) work well for labels. The `fonts` expor
 To use a font with any style, set the family and a size:
 
 ```js
-import { fonts } from 'inkmarkjs';
+import { fonts } from '@oblik/inkmark';
 const f = fonts.find((x) => x.name === 'Rock Salt');
 createPlayer(el, scene, { style: { font: { family: f.family, size: f.size, weight: f.weight } } });
 ```

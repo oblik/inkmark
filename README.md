@@ -7,7 +7,7 @@ Inkmark draws hand-drawn marks (circles, arrows, labels) over an image, a web pa
 You can mark elements on any live page. You need no scene and no background.
 
 ```js
-import { annotate } from 'inkmarkjs';
+import { annotate } from '@oblik/inkmark';
 
 await annotate('#price', 'circle').show();
 await annotate('#plan', { type: 'label', text: 'Best value', side: 'right' }).show();
@@ -22,7 +22,7 @@ A scene can also play with no controls: `createPlayer(el, scene, { controls: fal
 For one picture with no steps, write `marks` instead of `steps`. `drawScene` draws every mark at once, like a screenshot. It has no animation and no controls.
 
 ```js
-import { drawScene } from 'inkmarkjs';
+import { drawScene } from '@oblik/inkmark';
 
 await drawScene(document.querySelector('#box'), {
   inkmark: '1.0',
@@ -55,7 +55,13 @@ await drawScene(document.querySelector('#box'), {
 
 ## Install
 
-The package is not published yet. Use it from a local clone.
+```sh
+npm install @oblik/inkmark
+```
+
+For a script tag, use `dist/inkmark.iife.js`. It gives a global `Inkmark` (`Inkmark.annotate`, `Inkmark.createPlayer`).
+
+To work on the library itself:
 
 ```sh
 npm install
@@ -66,7 +72,7 @@ npm run dev     # test pages: /sandbox.html and /sandbox-live.html
 ## Quick start in the browser
 
 ```js
-import { createPlayer } from 'inkmarkjs';
+import { createPlayer } from '@oblik/inkmark';
 import '@fontsource/permanent-marker'; // the default label font
 
 const scene = await (await fetch('pricing.json')).json();
@@ -79,7 +85,7 @@ The player shows a row of step dots and a Play button. Click a dot to go to that
 
 ## CLI
 
-Run commands with `node cli/index.ts <command>` or `npm run inkmark -- <command>`.
+Run commands with `npx inkmark <command>`. The commands that use a browser also need `playwright-core` (`npm install --save-dev playwright-core`). In a clone of this repo, use `npm run inkmark -- <command>`.
 
 | Command | What it does |
 | --- | --- |
@@ -156,6 +162,14 @@ Pass `scheme: 'light' | 'dark' | 'auto'` to `mountScene` or `createPlayer`, or s
 1. Node 22.18 or newer.
 2. ffmpeg, for MP4 output.
 3. A Chromium browser, for `grid`, `preview`, `render` and html or svg targets in the CLI.
+
+## Security
+
+Treat a scene like code: only load scenes and backgrounds you trust.
+
+1. An `html` background loads in a same-origin frame, so its scripts run with the rights of your page. Inkmark needs this to measure the page.
+2. An `svg` background is cleaned before it goes into the page: scripts, `on*` handlers and `javascript:` links are removed.
+3. Do not load scenes that your users can edit without your own checks.
 
 ## License
 

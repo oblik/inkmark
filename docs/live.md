@@ -4,14 +4,14 @@ Live mode draws Inkmark marks on elements of a real web page. It needs no scene,
 
 ## Install
 
-1. With npm: `npm install inkmarkjs`. Then `import { annotate } from 'inkmarkjs'`.
+1. With npm: `npm install @oblik/inkmark`. Then `import { annotate } from '@oblik/inkmark'`.
 2. With a script tag: load `inkmark.iife.js`. It sets the global `Inkmark`. Use `Inkmark.annotate`.
 3. Labels use the font Permanent Marker. Load it on your page, or set `font.src` in a style.
 
 ## Quick start
 
 ```js
-import { annotate } from 'inkmarkjs';
+import { annotate } from '@oblik/inkmark';
 
 const mark = annotate('#price', 'circle');
 await mark.show();   // draws the mark

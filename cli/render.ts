@@ -82,6 +82,8 @@ async function renderHyperframes(data: PageData, ffmpeg: string, out: string, fp
     throw new Error(`HyperFrames is not installed. Install it with: npm install --save-dev hyperframes@${HF_VERSION}`);
   }
   const bin = join(dirname(pkg), 'dist', 'cli.js');
+  // Never fall back to `npx`: it downloads and runs whatever version is on npm.
+  if (!existsSync(bin)) throw new Error(`HyperFrames is installed, but ${bin} is missing. Reinstall it with: npm install --save-dev hyperframes@${HF_VERSION}`);
   const total = await withCapture(data, async (_p, info) => Math.round((lead + info.duration / 1000) * fps));
   const seconds = total / fps;
   const tmp = mkdtempSync(join(tmpdir(), 'inkmark-hf-'));
@@ -93,9 +95,7 @@ async function renderHyperframes(data: PageData, ffmpeg: string, out: string, fp
     const browserPath = browser.browserType().executablePath();
     await browser.close();
     const code = await new Promise<number>((res) => {
-      const cmd = existsSync(bin) ? process.execPath : 'npx';
-      const args = existsSync(bin) ? [bin] : ['hyperframes'];
-      const p = spawn(cmd, [...args, 'render', '-c', './index.html', '-o', out, '-f', String(fps), '--quiet'], {
+      const p = spawn(process.execPath, [bin, 'render', '-c', './index.html', '-o', out, '-f', String(fps), '--quiet'], {
         cwd: tmp,
         stdio: 'inherit',
         env: { ...process.env, ...HF_ENV, HYPERFRAMES_FFMPEG_PATH: ffmpeg, HYPERFRAMES_BROWSER_PATH: browserPath },
