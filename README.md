@@ -2,6 +2,8 @@
 
 Inkmark draws hand-drawn marks (circles, arrows, labels) over an image, a web page or a chart. It plays them step by step. One JSON scene gives a web player, one PNG per step and an MP4.
 
+See the live demo and examples at [inkmark.oblik.studio](https://inkmark.oblik.studio).
+
 ## Use it without the player
 
 You can mark elements on any live page. You need no scene and no background.
